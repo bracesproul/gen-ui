@@ -1,20 +1,19 @@
-import { ComponentProps } from "react"
-import {formatDistanceToNow} from "date-fns"
+import { ComponentProps } from "react";
+import { formatDistanceToNow } from "date-fns";
 
-import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { MailConfig, useMail } from "@/components/prebuilt/mail/use-mail"
-import { type Mail } from "@/components/prebuilt/mail/mail"
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { MailConfig, useMail } from "@/components/prebuilt/mail/use-mail";
+import { type Mail } from "@/components/prebuilt/mail/mail";
 
 interface MailListProps {
-  mails: Mail[],
-  mail: MailConfig,
-  setMail: (mail: MailConfig) => void
+  mails: Mail[];
+  mail: MailConfig;
+  setMail: (mail: MailConfig) => void;
 }
 
 export function MailList({ mails, mail, setMail }: MailListProps) {
-
   return (
     <ScrollArea className="h-screen">
       <div className="flex flex-col gap-2 p-4 pt-0">
@@ -23,7 +22,7 @@ export function MailList({ mails, mail, setMail }: MailListProps) {
             key={item.id}
             className={cn(
               "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent",
-              mail.selected === item.id && "bg-muted"
+              mail.selected === item.id && "bg-muted",
             )}
             onClick={() =>
               setMail({
@@ -45,7 +44,7 @@ export function MailList({ mails, mail, setMail }: MailListProps) {
                     "ml-auto text-xs",
                     mail.selected === item.id
                       ? "text-foreground"
-                      : "text-muted-foreground"
+                      : "text-muted-foreground",
                   )}
                 >
                   {formatDistanceToNow(new Date(item.date), {
@@ -71,19 +70,19 @@ export function MailList({ mails, mail, setMail }: MailListProps) {
         ))}
       </div>
     </ScrollArea>
-  )
+  );
 }
 
 function getBadgeVariantFromLabel(
-  label: string
+  label: string,
 ): ComponentProps<typeof Badge>["variant"] {
   if (["work"].includes(label.toLowerCase())) {
-    return "default"
+    return "default";
   }
 
   if (["personal"].includes(label.toLowerCase())) {
-    return "outline"
+    return "outline";
   }
 
-  return "secondary"
+  return "secondary";
 }

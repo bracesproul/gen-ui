@@ -1,25 +1,20 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Search } from "lucide-react"
+import * as React from "react";
+import { Search } from "lucide-react";
 
-import { Input } from "@/components/ui/input"
+import { Input } from "@/components/ui/input";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@/components/ui/resizable"
-import { Separator } from "@/components/ui/separator"
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import { TooltipProvider } from "@/components/ui/tooltip"
-import { MailDisplay } from "@/components/prebuilt/mail/components/mail-display"
-import { MailList } from "@/components/prebuilt/mail/components/mail-list"
-import { useMail } from "@/components/prebuilt/mail/use-mail"
+} from "@/components/ui/resizable";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { MailDisplay } from "@/components/prebuilt/mail/components/mail-display";
+import { MailList } from "@/components/prebuilt/mail/components/mail-list";
+import { useMail } from "@/components/prebuilt/mail/use-mail";
 
 export interface Mail {
   id: string;
@@ -33,13 +28,11 @@ export interface Mail {
 }
 
 export interface MailProps {
-  mails: Mail[]
+  mails: Mail[];
 }
 
-export function Mail({
-  mails,
-}: MailProps) {
-  const [mail, setMail] = useMail({ mails })
+export function Mail({ mails }: MailProps) {
+  const [mail, setMail] = useMail({ mails });
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -47,8 +40,8 @@ export function Mail({
         direction="horizontal"
         onLayout={(sizes: number[]) => {
           document.cookie = `react-resizable-panels:layout=${JSON.stringify(
-            sizes
-          )}`
+            sizes,
+          )}`;
         }}
         className="h-full max-h-[800px] items-stretch"
       >
@@ -84,7 +77,11 @@ export function Mail({
               <MailList mails={mails} mail={mail} setMail={setMail} />
             </TabsContent>
             <TabsContent value="unread" className="m-0">
-              <MailList mails={mails.filter((item) => !item.read)} mail={mail} setMail={setMail} />
+              <MailList
+                mails={mails.filter((item) => !item.read)}
+                mail={mail}
+                setMail={setMail}
+              />
             </TabsContent>
           </Tabs>
         </ResizablePanel>
@@ -96,5 +93,5 @@ export function Mail({
         </ResizablePanel>
       </ResizablePanelGroup>
     </TooltipProvider>
-  )
+  );
 }

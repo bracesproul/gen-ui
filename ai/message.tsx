@@ -9,7 +9,5 @@ export function AIMessage(props: { value: StreamableValue<string> }) {
   if (!data) {
     return null;
   }
-  return (
-    <AIMessageText content={data} />
-  );
+  return <AIMessageText content={data} />;
 }

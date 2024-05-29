@@ -12,5 +12,5 @@ export default function RootLayout(props: { children: ReactNode }) {
         </div>
       </body>
     </html>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState } from "react";
 
 export default function useChat() {
   const [messages, setMessages] = useState([]);
@@ -8,5 +8,5 @@ export default function useChat() {
   return {
     messages,
     setMessages,
-  }
+  };
 }

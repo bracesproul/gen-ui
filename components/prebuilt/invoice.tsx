@@ -5,9 +5,9 @@ import {
   CreditCard,
   MoreVertical,
   Truck,
-} from "lucide-react"
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,28 +15,28 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
-} from "@/components/ui/pagination"
-import { Separator } from "@/components/ui/separator"
-import { useEffect, useState } from "react"
+} from "@/components/ui/pagination";
+import { Separator } from "@/components/ui/separator";
+import { useEffect, useState } from "react";
 
 export type LineItem = {
   id: string;
   name: string;
   quantity: number;
   price: number;
-}
+};
 
 export interface InvoiceProps {
   orderId: string;
@@ -61,18 +61,20 @@ export interface InvoiceProps {
 
 export default function Invoice(props: InvoiceProps) {
   const [priceDetails, setPriceDetails] = useState({
-    shipping: 5.00,
-    tax: 0.00,
-    total: 0.00,
-    lineItemTotal: 0.00,
+    shipping: 5.0,
+    tax: 0.0,
+    total: 0.0,
+    lineItemTotal: 0.0,
   });
 
   useEffect(() => {
     if (props.lineItems.length > 0) {
-      const totalPriceLineItems = props.lineItems.reduce((acc, lineItem) => {
-        return acc + (lineItem.price * lineItem.quantity);
-      }, 0).toFixed(2);
-      const shipping = 5.00;
+      const totalPriceLineItems = props.lineItems
+        .reduce((acc, lineItem) => {
+          return acc + lineItem.price * lineItem.quantity;
+        }, 0)
+        .toFixed(2);
+      const shipping = 5.0;
       const tax = Number(totalPriceLineItems) * 0.075;
       const total = (Number(totalPriceLineItems) + shipping + tax).toFixed(2);
       setPriceDetails({
@@ -80,9 +82,9 @@ export default function Invoice(props: InvoiceProps) {
         tax,
         total: Number(total),
         lineItemTotal: Number(totalPriceLineItems),
-      })
+      });
     }
-  }, [props.lineItems])
+  }, [props.lineItems]);
 
   return (
     <Card className="overflow-hidden">
@@ -99,7 +101,10 @@ export default function Invoice(props: InvoiceProps) {
               <span className="sr-only">Copy Order ID</span>
             </Button>
           </CardTitle>
-          <CardDescription>Date: {new Date().getMonth()} {new Date().getDay()}, {new Date().getFullYear()}</CardDescription>
+          <CardDescription>
+            Date: {new Date().getMonth()} {new Date().getDay()},{" "}
+            {new Date().getFullYear()}
+          </CardDescription>
         </div>
         <div className="ml-auto flex items-center gap-1">
           <Button size="sm" variant="outline" className="h-8 gap-1">
@@ -129,15 +134,20 @@ export default function Invoice(props: InvoiceProps) {
           <div className="font-semibold">Order Details</div>
           <ul className="grid gap-3">
             {props.lineItems.map((lineItem) => {
-              const totalPrice = (lineItem.price * lineItem.quantity).toFixed(2);
+              const totalPrice = (lineItem.price * lineItem.quantity).toFixed(
+                2,
+              );
               return (
-                <li key={lineItem.id} className="flex items-center justify-between">
+                <li
+                  key={lineItem.id}
+                  className="flex items-center justify-between"
+                >
                   <span className="text-muted-foreground">
                     {lineItem.name} x <span>{lineItem.quantity}</span>
                   </span>
                   <span>${totalPrice}</span>
                 </li>
-              )
+              );
             })}
           </ul>
           <Separator className="my-2" />
@@ -167,7 +177,10 @@ export default function Invoice(props: InvoiceProps) {
             <address className="grid gap-0.5 not-italic text-muted-foreground">
               <span>{props.shippingAddress.name}</span>
               <span>{props.shippingAddress.street}</span>
-              <span>{props.shippingAddress.city} {props.shippingAddress.state}, {props.shippingAddress.zip}</span>
+              <span>
+                {props.shippingAddress.city} {props.shippingAddress.state},{" "}
+                {props.shippingAddress.zip}
+              </span>
             </address>
           </div>
           <div className="grid auto-rows-max gap-3">
@@ -219,5 +232,5 @@ export default function Invoice(props: InvoiceProps) {
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }
