@@ -1,3 +1,5 @@
+"use client";
+
 import {
   CircleIcon,
   StarIcon,
@@ -11,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Skeleton } from "../ui/skeleton"
 
 export interface DemoGithubProps {
   owner: string
@@ -20,9 +23,36 @@ export interface DemoGithubProps {
   language: string
 }
 
-export function DemoGithub(props: DemoGithubProps) {
+export function GithubLoading() {
   return (
-    <Card>
+    <Card className="w-[450px]">
+      <CardHeader className="grid grid-cols-[1fr_110px] items-start gap-4 space-y-0">
+        <div className="space-y-1">
+          <CardTitle>
+            <Skeleton className="h-[18px] w-[48px]" />
+          </CardTitle>
+          <CardDescription>
+            <div className="flex flex-col gap-[2px] pt-[4px]">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={`description-${i}`} className="h-[12px] w-[86px]" />
+              ))}
+            </div>
+          </CardDescription>
+        </div>
+        <div className="flex items-center space-x-1 rounded-md bg-secondary text-secondary-foreground">
+          <Skeleton className="h-[38px]" />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-[12px]" />
+      </CardContent>
+    </Card>
+  )
+}
+
+export function Github(props: DemoGithubProps) {
+  return (
+    <Card className="w-[450px]">
       <CardHeader className="grid grid-cols-[1fr_110px] items-start gap-4 space-y-0">
         <div className="space-y-1">
           <CardTitle>{props.owner}/{props.repo}</CardTitle>
@@ -47,7 +77,7 @@ export function DemoGithub(props: DemoGithubProps) {
           </div>
           <div className="flex items-center">
             <StarIcon className="mr-1 h-3 w-3" />
-            {props.stars}
+            {props.stars.toLocaleString()}
           </div>
           <div>Updated {new Date().getMonth()} {new Date().getFullYear()}</div>
         </div>
