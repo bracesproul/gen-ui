@@ -15,6 +15,9 @@ import {
   CurrentWeather,
   CurrentWeatherLoading,
 } from "@/components/prebuilt/weather";
+// import { emailSchema, getEmailData } from "./tools/email";
+// import { Mail } from "@/components/prebuilt/mail/mail";
+import { headers } from "next/headers";
 
 // write an async sleep function
 function sleep(ms: number) {
@@ -56,8 +59,7 @@ const invoiceTool = new DynamicStructuredTool({
     stream.update(<InvoiceLoading />);
 
     const data = getInvoiceData(input);
-    // Artificial delay to show off the loading state.
-    // SMH! GPT-4o is too fast!
+
     await sleep(3000);
     stream.done(<Invoice {...data} />);
 
@@ -75,19 +77,36 @@ const weatherTool = new DynamicStructuredTool({
     stream.update(<CurrentWeatherLoading />);
 
     const data = await weatherData(input);
-    // Artificial delay to show off the loading state.
-    // SMH! GPT-4o is too fast!
-    // await sleep(3000);
+
     stream.done(<CurrentWeather {...data} />);
 
     return JSON.stringify(data, null);
   },
 });
 
+// const emailTool = new DynamicStructuredTool({
+//   name: "get_email",
+//   description:
+//     "A tool to get the users email inbox.",
+//   schema: emailSchema,
+//   func: async (_, config) => {
+//     const stream = createRunnableUI(config);
+//     stream.update(<div>Fetching your inbox...</div>);
+
+//     const data = getEmailData();
+//     // Artificial delay to show off the loading state.
+//     // SMH! GPT-4o is too fast!
+//     await sleep(3000);
+//     stream.done(<Mail mails={data} />);
+
+//     return JSON.stringify(data, null);
+//   },
+// });
+
 const prompt = ChatPromptTemplate.fromMessages([
   [
     "system",
-    "You are an assistant tasked with either using tools to complete the users request, or engaging in conversation.",
+    `You are an assistant tasked with either using tools to complete the users request, or engaging in conversation.`,
   ],
   new MessagesPlaceholder("chat_history"),
   ["human", "{input}"],
