@@ -26,7 +26,7 @@ export function LoginForm() {
   };
 
   return (
-    <Card className="w-full max-w-sm">
+    <Card className="w-full max-w-md">
       {success ? (
         <CardHeader>
           <CardTitle className="text-2xl">Success</CardTitle>
