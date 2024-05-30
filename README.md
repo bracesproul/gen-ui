@@ -4,7 +4,6 @@
 
 This application aims to provide a template for building generative UI applications with LangChain.js.
 It comes pre-built with a few UI features which you can use to play about with gen ui. The UI components are built using [Shadcn](https://ui.shadcn.com/).
-And you can try out the production version [here](https://gen-ui-five.vercel.app/).
 
 ## Getting Started
 
