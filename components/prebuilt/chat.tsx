@@ -192,7 +192,7 @@ export default function Chat() {
         onSubmit={async (e) => {
           e.stopPropagation();
           e.preventDefault();
-          onSubmit(input);
+          await onSubmit(input);
         }}
         className="w-full flex flex-row gap-2"
       >
