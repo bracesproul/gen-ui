@@ -12,6 +12,28 @@ import { LoginForm } from "./auth";
 
 export interface ChatProps {}
 
+function convertFileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64String = reader.result as string;
+      resolve(base64String.split(",")[1]); // Remove the data URL prefix
+    };
+    reader.onerror = (error) => {
+      reject(error);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function FileUploadMessage({ file }: { file: File }) {
+  return (
+    <div className="flex w-full max-w-fit ml-auto">
+      <p>File uploaded: {file.name}</p>
+    </div>
+  );
+}
+
 export default function Chat() {
   const actions = useActions<typeof EndpointsContext>();
   const authMessage = "You must authenticate first.";
@@ -21,6 +43,7 @@ export default function Chat() {
   const [elements, setElements] = useState<JSX.Element[]>([]);
   const [history, setHistory] = useState<[role: string, content: string][]>([]);
   const [input, setInput] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File>();
 
   useEffect(() => {
     const nameParam = searchParams.get("name");
@@ -34,9 +57,14 @@ export default function Chat() {
       ];
       const lastUserQuestion = history[history.length - 2]?.[1];
 
+      let base64File: string | undefined = undefined;
+      if (selectedFile) {
+        base64File = await convertFileToBase64(selectedFile);
+      }
       const element = await actions.agent({
         input: lastUserQuestion,
         chat_history: newHistory,
+        file: base64File,
       });
 
       newElements.push(
@@ -62,6 +90,7 @@ export default function Chat() {
 
       setElements(newElements);
       setInput("");
+      setSelectedFile(undefined);
     }
     if (nameParam && history[history.length - 1]?.[1] === authMessage) {
       postAuthRequest().then(() => {
@@ -80,6 +109,7 @@ export default function Chat() {
           className="flex flex-col w-full gap-1 mt-auto"
           key={history.length}
         >
+          {selectedFile && <FileUploadMessage file={selectedFile} />}
           <HumanMessageText content={input} />
           <div className="flex flex-col gap-1 w-full max-w-fit mr-auto">
             <LoginForm />
@@ -88,6 +118,7 @@ export default function Chat() {
         </div>,
       );
 
+      /** @TODO file should be passed here. Maybe special "file" type? */
       setHistory((prev) => [
         ...prev,
         ["user", input],
@@ -96,14 +127,23 @@ export default function Chat() {
 
       setElements(newElements);
       setInput("");
+      setSelectedFile(undefined);
       return;
     }
 
-    // execute the agent with user input and chat history
-    const element = await actions.agent({ input, chat_history: history });
+    let base64File: string | undefined = undefined;
+    if (selectedFile) {
+      base64File = await convertFileToBase64(selectedFile);
+    }
+    const element = await actions.agent({
+      input,
+      chat_history: history,
+      file: base64File,
+    });
 
     newElements.push(
       <div className="flex flex-col w-full gap-1 mt-auto" key={history.length}>
+        {selectedFile && <FileUploadMessage file={selectedFile} />}
         <HumanMessageText content={input} />
         <div className="flex flex-col gap-1 w-full max-w-fit mr-auto">
           {element.ui}
@@ -126,6 +166,7 @@ export default function Chat() {
 
     setElements(newElements);
     setInput("");
+    setSelectedFile(undefined);
   }
 
   return (
@@ -146,6 +187,19 @@ export default function Chat() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
+        <div className="w-[300px]">
+          <Input
+            placeholder="Upload"
+            id="image"
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                setSelectedFile(e.target.files[0]);
+              }
+            }}
+          />
+        </div>
         <Button type="submit">Submit</Button>
       </form>
     </div>
