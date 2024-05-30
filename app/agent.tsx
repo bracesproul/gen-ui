@@ -23,7 +23,10 @@ const convertChatHistoryToMessages = (
 async function processFile(input: {
   input: string;
   chat_history: [role: string, content: string][];
-  file?: string;
+  file?: {
+    base64: string;
+    extension: string;
+  };
 }) {
   if (input.file) {
     const imageTemplate = new HumanMessage({
@@ -31,7 +34,7 @@ async function processFile(input: {
         {
           type: "image_url",
           image_url: {
-            url: `data:image/png;base64,${input.file}`,
+            url: `data:image/${input.file.extension};base64,${input.file.base64}`,
           },
         },
       ],
@@ -54,7 +57,10 @@ async function processFile(input: {
 async function agent(inputs: {
   input: string;
   chat_history: [role: string, content: string][];
-  file?: string;
+  file?: {
+    base64: string;
+    extension: string;
+  };
 }) {
   "use server";
   const processedInputs = await processFile(inputs);

@@ -58,13 +58,20 @@ export default function Chat() {
       const lastUserQuestion = history[history.length - 2]?.[1];
 
       let base64File: string | undefined = undefined;
+      let fileExtension = selectedFile?.type.split("/")[1];
       if (selectedFile) {
         base64File = await convertFileToBase64(selectedFile);
       }
       const element = await actions.agent({
         input: lastUserQuestion,
         chat_history: newHistory,
-        file: base64File,
+        file:
+          base64File && fileExtension
+            ? {
+                base64: base64File,
+                extension: fileExtension,
+              }
+            : undefined,
       });
 
       newElements.push(
@@ -132,13 +139,20 @@ export default function Chat() {
     }
 
     let base64File: string | undefined = undefined;
+    let fileExtension = selectedFile?.type.split("/")[1];
     if (selectedFile) {
       base64File = await convertFileToBase64(selectedFile);
     }
     const element = await actions.agent({
       input,
       chat_history: history,
-      file: base64File,
+      file:
+        base64File && fileExtension
+          ? {
+              base64: base64File,
+              extension: fileExtension,
+            }
+          : undefined,
     });
 
     newElements.push(

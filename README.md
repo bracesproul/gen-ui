@@ -62,3 +62,10 @@ yarn start
 
 yarn build
 ```
+
+### Go further
+
+If you're interested in ways to take this demo application further, I'd consider the following:
+
+- A custom LangGraph agent instead of the default `AgentExecutor` amd `createToolCallingAgent`
+- Adding a "classifier" step before the tool call, with a small fast model (e.g Claude 3 Haiku) which selects the tool call/component first. This would improve overall latency for the time to first UI (with the loading state component).
