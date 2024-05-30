@@ -1,5 +1,7 @@
 # Generative UI with LangChain.js 🦜🔗
 
+![Generative UI with LangChain.js](./public/gen_ui_diagram.png)
+
 ## Overview
 
 This application aims to provide a template for building generative UI applications with LangChain.js.
