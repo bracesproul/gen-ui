@@ -40,8 +40,8 @@ export type ShippingAddress = {
 
 export type CustomerInfo = {
   name: string;
-  email: string;
-  phone: string;
+  email?: string;
+  phone?: string;
 };
 
 export type PaymentInfo = {
@@ -52,9 +52,9 @@ export type PaymentInfo = {
 export interface InvoiceProps {
   orderId: string;
   lineItems: LineItem[];
-  shippingAddress: ShippingAddress;
-  customerInfo: CustomerInfo;
-  paymentInfo: PaymentInfo;
+  shippingAddress?: ShippingAddress;
+  customerInfo?: CustomerInfo;
+  paymentInfo?: PaymentInfo;
 }
 
 export function InvoiceLoading() {
@@ -306,61 +306,80 @@ export function Invoice(props: InvoiceProps) {
             </li>
           </ul>
         </div>
-        <Separator className="my-4" />
-        <div className="grid grid-cols-2 gap-4">
-          <div className="grid gap-3">
-            <div className="font-semibold">Shipping Information</div>
-            <address className="grid gap-0.5 not-italic text-muted-foreground">
-              <span>{props.shippingAddress.name}</span>
-              <span>{props.shippingAddress.street}</span>
-              <span>
-                {props.shippingAddress.city} {props.shippingAddress.state},{" "}
-                {props.shippingAddress.zip}
-              </span>
-            </address>
-          </div>
-          <div className="grid auto-rows-max gap-3">
-            <div className="font-semibold">Billing Information</div>
-            <div className="text-muted-foreground">
-              Same as shipping address
+
+        {props.shippingAddress && (
+          <>
+            <Separator className="my-4" />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-3">
+                <div className="font-semibold">Shipping Information</div>
+                <address className="grid gap-0.5 not-italic text-muted-foreground">
+                  <span>{props.shippingAddress.name}</span>
+                  <span>{props.shippingAddress.street}</span>
+                  <span>
+                    {props.shippingAddress.city} {props.shippingAddress.state},{" "}
+                    {props.shippingAddress.zip}
+                  </span>
+                </address>
+              </div>
+              <div className="grid auto-rows-max gap-3">
+                <div className="font-semibold">Billing Information</div>
+                <div className="text-muted-foreground">
+                  Same as shipping address
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <Separator className="my-4" />
-        <div className="grid gap-3">
-          <div className="font-semibold">Customer Information</div>
-          <dl className="grid gap-3">
-            <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Customer</dt>
-              <dd>{props.customerInfo.name}</dd>
+          </>
+        )}
+
+        {props.customerInfo && (
+          <>
+            <Separator className="my-4" />
+            <div className="grid gap-3">
+              <div className="font-semibold">Customer Information</div>
+              <dl className="grid gap-3">
+                <div className="flex items-center justify-between">
+                  <dt className="text-muted-foreground">Customer</dt>
+                  <dd>{props.customerInfo.name}</dd>
+                </div>
+                {props.customerInfo.email && (
+                  <div className="flex items-center justify-between">
+                    <dt className="text-muted-foreground">Email</dt>
+                    <dd>
+                      <a href="mailto:">{props.customerInfo.email}</a>
+                    </dd>
+                  </div>
+                )}
+                {props.customerInfo.phone && (
+                  <div className="flex items-center justify-between">
+                    <dt className="text-muted-foreground">Phone</dt>
+                    <dd>
+                      <a href="tel:">{props.customerInfo.phone}</a>
+                    </dd>
+                  </div>
+                )}
+              </dl>
             </div>
-            <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Email</dt>
-              <dd>
-                <a href="mailto:">{props.customerInfo.email}</a>
-              </dd>
+          </>
+        )}
+
+        {props.paymentInfo && (
+          <>
+            <Separator className="my-4" />
+            <div className="grid gap-3">
+              <div className="font-semibold">Payment Information</div>
+              <dl className="grid gap-3">
+                <div className="flex items-center justify-between">
+                  <dt className="flex items-center gap-1 text-muted-foreground">
+                    <CreditCard className="h-4 w-4" />
+                    {props.paymentInfo.cardType}
+                  </dt>
+                  <dd>**** **** **** {props.paymentInfo.cardNumberLastFour}</dd>
+                </div>
+              </dl>
             </div>
-            <div className="flex items-center justify-between">
-              <dt className="text-muted-foreground">Phone</dt>
-              <dd>
-                <a href="tel:">{props.customerInfo.phone}</a>
-              </dd>
-            </div>
-          </dl>
-        </div>
-        <Separator className="my-4" />
-        <div className="grid gap-3">
-          <div className="font-semibold">Payment Information</div>
-          <dl className="grid gap-3">
-            <div className="flex items-center justify-between">
-              <dt className="flex items-center gap-1 text-muted-foreground">
-                <CreditCard className="h-4 w-4" />
-                {props.paymentInfo.cardType}
-              </dt>
-              <dd>**** **** **** {props.paymentInfo.cardNumberLastFour}</dd>
-            </div>
-          </dl>
-        </div>
+          </>
+        )}
       </CardContent>
       <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
         <div className="text-xs text-muted-foreground">

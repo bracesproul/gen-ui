@@ -8,18 +8,14 @@ import { createRunnableUI } from "../utils/server";
 import { githubRepoTool, githubRepoToolSchema } from "./tools/github_repo";
 import { Github, GithubLoading } from "@/components/prebuilt/github";
 import { AgentExecutor, createToolCallingAgent } from "langchain/agents";
-import { getInvoiceData, invoiceSchema } from "./tools/invoice";
+import { InvoiceSchema } from "./tools/invoice";
 import { Invoice, InvoiceLoading } from "@/components/prebuilt/invoice";
 import { weatherSchema, weatherData } from "./tools/weather";
 import {
   CurrentWeather,
   CurrentWeatherLoading,
 } from "@/components/prebuilt/weather";
-// import { emailSchema, getEmailData } from "./tools/email";
-// import { Mail } from "@/components/prebuilt/mail/mail";
-import { headers } from "next/headers";
 
-// write an async sleep function
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -42,7 +38,6 @@ const githubTool = new DynamicStructuredTool({
     // Artificial delay to show off the loading state.
     // SMH! GPT-4o is too fast!
     await sleep(3000);
-    console.log("PARSED RESULTS", result);
     stream.done(<Github {...result} />);
 
     return JSON.stringify(result, null);
@@ -52,18 +47,16 @@ const githubTool = new DynamicStructuredTool({
 const invoiceTool = new DynamicStructuredTool({
   name: "get_order_invoice",
   description:
-    "A tool to fetch the invoice from an order. Requires an order id.",
-  schema: invoiceSchema,
+    "A tool to fetch the invoice from an order. This should only be called if a user uploads an image/receipt of an order.",
+  schema: InvoiceSchema,
   func: async (input, config) => {
     const stream = createRunnableUI(config);
     stream.update(<InvoiceLoading />);
 
-    const data = getInvoiceData(input);
-
     await sleep(3000);
-    stream.done(<Invoice {...data} />);
+    stream.done(<Invoice {...input} />);
 
-    return JSON.stringify(data, null);
+    return JSON.stringify(input, null);
   },
 });
 
@@ -83,25 +76,6 @@ const weatherTool = new DynamicStructuredTool({
     return JSON.stringify(data, null);
   },
 });
-
-// const emailTool = new DynamicStructuredTool({
-//   name: "get_email",
-//   description:
-//     "A tool to get the users email inbox.",
-//   schema: emailSchema,
-//   func: async (_, config) => {
-//     const stream = createRunnableUI(config);
-//     stream.update(<div>Fetching your inbox...</div>);
-
-//     const data = getEmailData();
-//     // Artificial delay to show off the loading state.
-//     // SMH! GPT-4o is too fast!
-//     await sleep(3000);
-//     stream.done(<Mail mails={data} />);
-
-//     return JSON.stringify(data, null);
-//   },
-// });
 
 const prompt = ChatPromptTemplate.fromMessages([
   [
