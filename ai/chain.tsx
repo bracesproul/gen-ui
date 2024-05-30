@@ -7,9 +7,14 @@ import {
 import { createRunnableUI } from "../utils/server";
 import { githubRepoTool, githubRepoToolSchema } from "./tools/github_repo";
 import { Github, GithubLoading } from "@/components/prebuilt/github";
-import { z } from "zod";
-import { AIMessageLoading, AIMessageText } from "@/components/prebuilt/message";
 import { AgentExecutor, createToolCallingAgent } from "langchain/agents";
+import { getInvoiceData, invoiceSchema } from "./tools/invoice";
+import { Invoice, InvoiceLoading } from "@/components/prebuilt/invoice";
+import { weatherSchema, weatherData } from "./tools/weather";
+import {
+  CurrentWeather,
+  CurrentWeatherLoading,
+} from "@/components/prebuilt/weather";
 
 // write an async sleep function
 function sleep(ms: number) {
@@ -26,20 +31,56 @@ const githubTool = new DynamicStructuredTool({
     stream.update(<GithubLoading />);
 
     const result = await githubRepoTool(input);
-    let parsedResult;
-    try {
-      parsedResult = JSON.parse(result);
-    } catch (_) {
+    if (typeof result === "string") {
       // Failed to parse, return error message
       stream.done(<p>{result}</p>);
+      return result;
     }
     // Artificial delay to show off the loading state.
     // SMH! GPT-4o is too fast!
     await sleep(3000);
-    console.log("PARSED RESULTS", parsedResult);
-    stream.done(<Github {...parsedResult} />);
+    console.log("PARSED RESULTS", result);
+    stream.done(<Github {...result} />);
 
-    return result;
+    return JSON.stringify(result, null);
+  },
+});
+
+const invoiceTool = new DynamicStructuredTool({
+  name: "get_order_invoice",
+  description:
+    "A tool to fetch the invoice from an order. Requires an order id.",
+  schema: invoiceSchema,
+  func: async (input, config) => {
+    const stream = createRunnableUI(config);
+    stream.update(<InvoiceLoading />);
+
+    const data = getInvoiceData(input);
+    // Artificial delay to show off the loading state.
+    // SMH! GPT-4o is too fast!
+    await sleep(3000);
+    stream.done(<Invoice {...data} />);
+
+    return JSON.stringify(data, null);
+  },
+});
+
+const weatherTool = new DynamicStructuredTool({
+  name: "get_weather",
+  description:
+    "A tool to fetch the current weather, given a city and state. If the city/state is not provided, ask the user for both the city and state.",
+  schema: weatherSchema,
+  func: async (input, config) => {
+    const stream = createRunnableUI(config);
+    stream.update(<CurrentWeatherLoading />);
+
+    const data = await weatherData(input);
+    // Artificial delay to show off the loading state.
+    // SMH! GPT-4o is too fast!
+    // await sleep(3000);
+    stream.done(<CurrentWeather {...data} />);
+
+    return JSON.stringify(data, null);
   },
 });
 
@@ -53,7 +94,7 @@ const prompt = ChatPromptTemplate.fromMessages([
   new MessagesPlaceholder("agent_scratchpad"),
 ]);
 
-const tools = [githubTool];
+const tools = [githubTool, invoiceTool, weatherTool];
 
 const llm = new ChatOpenAI({
   temperature: 0,

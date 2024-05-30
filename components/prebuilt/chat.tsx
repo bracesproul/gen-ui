@@ -19,7 +19,6 @@ export default function Chat() {
 
   async function onSubmit(input: string) {
     const newElements = [...elements];
-    console.log(actions);
 
     // execute the agent with user input and chat history
     const element = await actions.agent({ input, chat_history: history });
@@ -51,7 +50,7 @@ export default function Chat() {
   }
 
   return (
-    <div className="w-[70vw] h-full min-h-[80vh] flex flex-col gap-4 mx-auto border-[1px] border-gray-200 rounded-lg p-3 shadow-sm bg-gray-50/25">
+    <div className="w-[70vw] overflow-y-scroll h-[80vh] flex flex-col gap-4 mx-auto border-[1px] border-gray-200 rounded-lg p-3 shadow-sm bg-gray-50/25">
       <LocalContext.Provider value={onSubmit}>
         <div className="flex flex-col w-full gap-1 mt-auto">{elements}</div>
       </LocalContext.Provider>
@@ -61,9 +60,13 @@ export default function Chat() {
           e.preventDefault();
           onSubmit(input);
         }}
-        className="w-full flex flex-row gap-1"
+        className="w-full flex flex-row gap-2"
       >
-        <Input value={input} onChange={(e) => setInput(e.target.value)} />
+        <Input
+          placeholder="What's the weather like in San Francisco?"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
         <Button type="submit">Submit</Button>
       </form>
     </div>

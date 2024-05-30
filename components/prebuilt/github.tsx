@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "../ui/skeleton";
+import { format } from "date-fns";
 
 export interface DemoGithubProps {
   owner: string;
@@ -51,6 +52,8 @@ export function GithubLoading() {
 }
 
 export function Github(props: DemoGithubProps) {
+  const currentMonth = format(new Date(), "MMMM");
+  const currentYear = format(new Date(), "yyyy");
   return (
     <Card className="w-[450px]">
       <CardHeader className="grid grid-cols-[1fr_110px] items-start gap-4 space-y-0">
@@ -84,7 +87,7 @@ export function Github(props: DemoGithubProps) {
             {props.stars.toLocaleString()}
           </div>
           <div>
-            Updated {new Date().getMonth()} {new Date().getFullYear()}
+            Updated {currentMonth} {currentYear}
           </div>
         </div>
       </CardContent>

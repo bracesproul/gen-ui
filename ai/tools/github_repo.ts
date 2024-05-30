@@ -23,12 +23,12 @@ export async function githubRepoTool(
         "X-GitHub-Api-Version": "2022-11-28",
       },
     });
-    return JSON.stringify({
+    return {
       ...input,
-      description: repoData.data.description,
+      description: repoData.data.description ?? "",
       stars: repoData.data.stargazers_count,
-      language: repoData.data.language,
-    });
+      language: repoData.data.language ?? "",
+    };
   } catch (err) {
     console.error(err);
     return "There was an error fetching the repository. Please check the owner and repo names.";

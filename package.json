@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@faker-js/faker": "^8.4.1",
     "@langchain/core": "^0.2.2",
     "@langchain/openai": "^0.0.34",
     "@radix-ui/react-avatar": "^1.0.4",
