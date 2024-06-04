@@ -22,6 +22,7 @@ export async function weatherData(input: z.infer<typeof weatherSchema>) {
     `https://geocode.xyz/${input.city.toLowerCase()},${input.state.toLowerCase()},${input.country.toLowerCase()}?json=1&auth=${geoCodeApiKey}`,
   );
   if (!geoCodeResponse.ok) {
+    console.error("No geocode data found.");
     throw new Error("Failed to get geocode data.");
   }
   const geoCodeData = await geoCodeResponse.json();
@@ -31,6 +32,7 @@ export async function weatherData(input: z.infer<typeof weatherSchema>) {
     `https://api.weather.gov/points/${latt},${longt}`,
   );
   if (!weatherGovResponse.ok) {
+    console.error("No weather data found.");
     throw new Error("Failed to get weather data.");
   }
   const weatherGovData = await weatherGovResponse.json();
@@ -38,6 +40,7 @@ export async function weatherData(input: z.infer<typeof weatherSchema>) {
 
   const forecastResponse = await fetch(properties.forecast);
   if (!forecastResponse.ok) {
+    console.error("No forecast data found.");
     throw new Error("Failed to get forecast data.");
   }
   const forecastData = await forecastResponse.json();

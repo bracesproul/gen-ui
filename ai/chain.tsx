@@ -26,8 +26,7 @@ const githubTool = new DynamicStructuredTool({
     "A tool to fetch details of a Github repository. Given owner and repo names, this tool will return the repo description, stars, and primary language.",
   schema: githubRepoToolSchema,
   func: async (input, config) => {
-    const stream = createRunnableUI(config);
-    stream.update(<GithubLoading />);
+    const stream = createRunnableUI(config, <GithubLoading />);
 
     const result = await githubRepoTool(input);
     if (typeof result === "string") {
@@ -35,8 +34,7 @@ const githubTool = new DynamicStructuredTool({
       stream.done(<p>{result}</p>);
       return result;
     }
-    // Artificial delay to show off the loading state.
-    // SMH! GPT-4o is too fast!
+
     await sleep(3000);
     stream.done(<Github {...result} />);
 
@@ -50,10 +48,9 @@ const invoiceTool = new DynamicStructuredTool({
     "A tool to fetch the invoice from an order. This should only be called if a user uploads an image/receipt of an order.",
   schema: InvoiceSchema,
   func: async (input, config) => {
-    const stream = createRunnableUI(config);
-    stream.update(<InvoiceLoading />);
+    const stream = createRunnableUI(config, <InvoiceLoading />);
 
-    await sleep(3000);
+    // await sleep(3000);
     stream.done(<Invoice {...input} />);
 
     return JSON.stringify(input, null);
@@ -66,8 +63,7 @@ const weatherTool = new DynamicStructuredTool({
     "A tool to fetch the current weather, given a city and state. If the city/state is not provided, ask the user for both the city and state.",
   schema: weatherSchema,
   func: async (input, config) => {
-    const stream = createRunnableUI(config);
-    stream.update(<CurrentWeatherLoading />);
+    const stream = createRunnableUI(config, <CurrentWeatherLoading />);
 
     const data = await weatherData(input);
 
