@@ -1,3 +1,9 @@
+import {
+  CurrentWeatherLoading,
+  CurrentWeather,
+} from "@/components/prebuilt/weather";
+import { createRunnableUI } from "@/utils/server";
+import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
 
 export const weatherSchema = z.object({
@@ -52,3 +58,16 @@ export async function weatherData(input: z.infer<typeof weatherSchema>) {
     temperature: todayForecast.temperature,
   };
 }
+
+export const weatherTool = new DynamicStructuredTool({
+  name: "get_weather",
+  description:
+    "A tool to fetch the current weather, given a city and state. If the city/state is not provided, ask the user for both the city and state.",
+  schema: weatherSchema,
+  func: async (input, config) => {
+    const stream = createRunnableUI(config, <CurrentWeatherLoading />);
+    const data = await weatherData(input);
+    stream.done(<CurrentWeather {...data} />);
+    return JSON.stringify(data, null);
+  },
+});
