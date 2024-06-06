@@ -47,6 +47,7 @@ export default function Chat() {
     if (selectedFile) {
       base64File = await convertFileToBase64(selectedFile);
     }
+    console.log(history);
     const element = await actions.agent({
       input,
       chat_history: history,
@@ -73,12 +74,14 @@ export default function Chat() {
     // after which we can append to our chat history state
     (async () => {
       let lastEvent = await element.lastEvent;
-      if (typeof lastEvent === "string") {
+      if (typeof lastEvent === "string" && lastEvent !== "") {
         setHistory((prev) => [
           ...prev,
           ["user", input],
           ["assistant", lastEvent],
         ]);
+      } else {
+        setHistory((prev) => [...prev, ["user", input]]);
       }
     })();
 
