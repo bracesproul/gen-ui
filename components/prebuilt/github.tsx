@@ -64,15 +64,18 @@ export function Github(props: DemoGithubProps) {
           <CardDescription>{props.description}</CardDescription>
         </div>
         <Button
-            onClick={() => {
-              window.open(`https://github.com/${props.owner}/${props.repo}`, "_blank");
-            }}
-            variant="secondary"
-            className="ml-auto shadow-none w-fit px-6"
-          >
-            <StarIcon className="mr-2 h-4 w-4" />
-            Star
-          </Button>
+          onClick={() => {
+            window.open(
+              `https://github.com/${props.owner}/${props.repo}`,
+              "_blank",
+            );
+          }}
+          variant="secondary"
+          className="ml-auto shadow-none w-fit px-6"
+        >
+          <StarIcon className="mr-2 h-4 w-4" />
+          Star
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="flex space-x-4 text-sm text-muted-foreground">
