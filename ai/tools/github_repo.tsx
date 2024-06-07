@@ -9,9 +9,7 @@ const githubRepoToolSchema = z.object({
   repo: z.string().describe("The name of the repository."),
 });
 
-async function githubRepoTool(
-  input: z.infer<typeof githubRepoToolSchema>,
-) {
+async function githubRepoTool(input: z.infer<typeof githubRepoToolSchema>) {
   if (!process.env.GITHUB_TOKEN) {
     throw new Error("Missing GITHUB_TOKEN secret.");
   }
