@@ -2,22 +2,13 @@ import "server-only";
 
 import { ReactNode, isValidElement } from "react";
 import { createStreamableUI, createStreamableValue } from "ai/rsc";
-import {
-  Runnable,
-  RunnableConfig,
-  RunnableLambda,
-} from "@langchain/core/runnables";
+import { Runnable, RunnableLambda } from "@langchain/core/runnables";
 import {
   CallbackManagerForToolRun,
   CallbackManagerForRetrieverRun,
   CallbackManagerForChainRun,
-  CallbackManagerForLLMRun,
 } from "@langchain/core/callbacks/manager";
-import {
-  LogStreamCallbackHandler,
-  RunLogPatch,
-  StreamEvent,
-} from "@langchain/core/tracers/log_stream";
+import { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { AIProvider } from "./client";
 import { AIMessage } from "../ai/message";
 import { CompiledStateGraph } from "@langchain/langgraph";
@@ -64,9 +55,7 @@ export function streamRunnableUI<RunInput, RunOutput>(
       const [kind, type] = streamEvent.event.split("_").slice(1);
       if (type === "stream" && kind !== "chain") {
         const chunk = streamEvent.data.chunk;
-        if (isValidElement(chunk)) {
-          ui.append(chunk);
-        } else if ("text" in chunk && typeof chunk.text === "string") {
+        if ("text" in chunk && typeof chunk.text === "string") {
           if (!callbacks[streamEvent.run_id]) {
             // the createStreamableValue / useStreamableValue is preferred
             // as the stream events are updated immediately in the UI
@@ -111,12 +100,10 @@ export const createRunnableUI = async (
 ): Promise<ReturnType<typeof createStreamableUI>> => {
   if (!config) throw new Error("No config provided");
 
-  const lambda = RunnableLambda.from(
-    (init: React.ReactNode, config?: RunnableConfig) => {
-      const ui = createStreamableUI(init);
-      return ui;
-    },
-  ).withConfig({ runName: STREAM_UI_RUN_NAME });
+  const lambda = RunnableLambda.from((init: React.ReactNode) => {
+    const ui = createStreamableUI(init);
+    return ui;
+  }).withConfig({ runName: STREAM_UI_RUN_NAME });
 
   return lambda.invoke(initialValue, { callbacks: config.getChild() });
 };
