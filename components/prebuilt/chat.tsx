@@ -47,7 +47,6 @@ export default function Chat() {
     if (selectedFile) {
       base64File = await convertFileToBase64(selectedFile);
     }
-    console.log(history);
     const element = await actions.agent({
       input,
       chat_history: history,
