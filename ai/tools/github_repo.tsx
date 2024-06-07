@@ -44,7 +44,7 @@ export const githubTool = new DynamicStructuredTool({
     "A tool to fetch details of a Github repository. Given owner and repo names, this tool will return the repo description, stars, and primary language.",
   schema: githubRepoToolSchema,
   func: async (input, config) => {
-    const stream = createRunnableUI(config, <GithubLoading />);
+    const stream = await createRunnableUI(config, <GithubLoading />);
     const result = await githubRepoTool(input);
     if (typeof result === "string") {
       // Failed to parse, return error message

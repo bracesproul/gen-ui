@@ -84,10 +84,13 @@ export default function Chat() {
           setHistory((prev) => [
             ...prev,
             ["user", input],
-            ["assistant", `Tool result: ${JSON.stringify(lastEvent["invokeTools"]["toolResult"], null)}`],
+            [
+              "assistant",
+              `Tool result: ${JSON.stringify(lastEvent["invokeTools"]["toolResult"], null)}`,
+            ],
           ]);
         } else {
-          console.log("ELSE!", lastEvent)
+          console.log("ELSE!", lastEvent);
         }
       }
     })();
