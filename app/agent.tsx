@@ -20,7 +20,7 @@ const convertChatHistoryToMessages = (
   });
 };
 
-async function processFile(input: {
+function processFile(input: {
   input: string;
   chat_history: [role: string, content: string][];
   file?: {
@@ -63,7 +63,7 @@ async function agent(inputs: {
   };
 }) {
   "use server";
-  const processedInputs = await processFile(inputs);
+  const processedInputs = processFile(inputs);
 
   return streamRunnableUI(agentExecutor(), processedInputs);
 }

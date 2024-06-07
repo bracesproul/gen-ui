@@ -100,7 +100,7 @@ export const createRunnableUI = async (
 ): Promise<ReturnType<typeof createStreamableUI>> => {
   if (!config) throw new Error("No config provided");
 
-  const lambda = RunnableLambda.from((init: React.ReactNode) => {
+  const lambda = RunnableLambda.from((init?: React.ReactNode) => {
     const ui = createStreamableUI(init);
     return ui;
   }).withConfig({ runName: STREAM_UI_RUN_NAME });

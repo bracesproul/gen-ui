@@ -4,12 +4,12 @@ import { createRunnableUI } from "@/utils/server";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { Github, GithubLoading } from "@/components/prebuilt/github";
 
-export const githubRepoToolSchema = z.object({
+const githubRepoToolSchema = z.object({
   owner: z.string().describe("The name of the repository owner."),
   repo: z.string().describe("The name of the repository."),
 });
 
-export async function githubRepoTool(
+async function githubRepoTool(
   input: z.infer<typeof githubRepoToolSchema>,
 ) {
   if (!process.env.GITHUB_TOKEN) {
