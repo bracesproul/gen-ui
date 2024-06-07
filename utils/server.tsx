@@ -16,6 +16,7 @@ import {
 } from "@langchain/core/tracers/log_stream";
 import { AIProvider } from "./client";
 import { AIMessage } from "../ai/message";
+import { CompiledStateGraph } from "@langchain/langgraph";
 
 /**
  * Executes `streamEvents` method on a runnable
@@ -25,7 +26,9 @@ import { AIMessage } from "../ai/message";
  * @returns React node which can be sent to the client
  */
 export function streamRunnableUI<RunInput, RunOutput>(
-  runnable: Runnable<RunInput, RunOutput>,
+  runnable:
+    | Runnable<RunInput, RunOutput>
+    | CompiledStateGraph<RunInput, Partial<RunInput>>,
   inputs: RunInput,
 ) {
   const ui = createStreamableUI();
@@ -39,7 +42,9 @@ export function streamRunnableUI<RunInput, RunOutput>(
       ReturnType<typeof createStreamableUI | typeof createStreamableValue>
     > = {};
 
-    for await (const streamEvent of runnable.streamEvents(inputs, {
+    for await (const streamEvent of (
+      runnable as Runnable<RunInput, RunOutput>
+    ).streamEvents(inputs, {
       version: "v1",
     })) {
       const [kind, type] = streamEvent.event.split("_").slice(1);
@@ -66,7 +71,7 @@ export function streamRunnableUI<RunInput, RunOutput>(
 
     // resolve the promise, which will be sent
     // to the client thanks to RSC
-    resolve(lastEventValue?.data.output);
+    resolve(lastEventValue?.data.output["invokeModel"]["result"] ?? "");
 
     Object.values(callbacks).forEach((cb) => cb.done());
     ui.done();
