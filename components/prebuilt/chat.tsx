@@ -47,6 +47,7 @@ export default function Chat() {
     if (selectedFile) {
       base64File = await convertFileToBase64(selectedFile);
     }
+
     const element = await actions.agent({
       input,
       chat_history: history,
@@ -69,7 +70,7 @@ export default function Chat() {
       </div>,
     );
 
-    // consume the value stream to obtain the final string value
+    // consume the value stream to obtain the final value
     // after which we can append to our chat history state
     (async () => {
       let lastEvent = await element.lastEvent;

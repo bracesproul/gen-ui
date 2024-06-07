@@ -1,19 +1,19 @@
 import "server-only";
 
 import { ReactNode, isValidElement } from "react";
-import { createStreamableUI, createStreamableValue } from "ai/rsc";
-import { Runnable, RunnableLambda } from "@langchain/core/runnables";
+import { AIProvider } from "./client";
 import {
   CallbackManagerForToolRun,
   CallbackManagerForRetrieverRun,
   CallbackManagerForChainRun,
 } from "@langchain/core/callbacks/manager";
-import { StreamEvent } from "@langchain/core/tracers/log_stream";
-import { AIProvider } from "./client";
-import { AIMessage } from "../ai/message";
+import { createStreamableUI, createStreamableValue } from "ai/rsc";
+import { Runnable, RunnableLambda } from "@langchain/core/runnables";
 import { CompiledStateGraph } from "@langchain/langgraph";
+import { StreamEvent } from "@langchain/core/tracers/log_stream";
+import { AIMessage } from "@/ai/message";
 
-const STREAM_UI_RUN_NAME = "stream_ui_lambda";
+const STREAM_UI_RUN_NAME = "stream_runnable_ui";
 
 /**
  * Executes `streamEvents` method on a runnable
@@ -52,6 +52,7 @@ export function streamRunnableUI<RunInput, RunOutput>(
           ui.append(streamEvent.data.output.value);
         }
       }
+
       const [kind, type] = streamEvent.event.split("_").slice(1);
       if (type === "stream" && kind !== "chain") {
         const chunk = streamEvent.data.chunk;
@@ -68,6 +69,7 @@ export function streamRunnableUI<RunInput, RunOutput>(
           callbacks[streamEvent.run_id].append(chunk.text);
         }
       }
+
       lastEventValue = streamEvent;
     }
 
@@ -98,7 +100,9 @@ export const createRunnableUI = async (
     | undefined,
   initialValue?: React.ReactNode,
 ): Promise<ReturnType<typeof createStreamableUI>> => {
-  if (!config) throw new Error("No config provided");
+  if (!config) {
+    throw new Error("Callback manager is not defined");
+  }
 
   const lambda = RunnableLambda.from((init?: React.ReactNode) => {
     const ui = createStreamableUI(init);

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Octokit } from "octokit";
-import { createRunnableUI } from "@/utils/server";
 import { DynamicStructuredTool } from "@langchain/core/tools";
+import { createRunnableUI } from "@/utils/server";
 import { Github, GithubLoading } from "@/components/prebuilt/github";
 
 const githubRepoToolSchema = z.object({
