@@ -88,19 +88,19 @@ export function streamRunnableUI<RunInput, RunOutput>(
  * Yields an UI element within a runnable,
  * which can be streamed to the client via `streamRunnableUI`
  *
- * @param config callback
+ * @param callbackManager callback
  * @param initialValue Initial React node to be sent to the client
  * @returns Vercel AI RSC compatible streamable UI
  */
 export const createRunnableUI = async (
-  config:
+  callbackManager:
     | CallbackManagerForToolRun
     | CallbackManagerForRetrieverRun
     | CallbackManagerForChainRun
     | undefined,
   initialValue?: React.ReactNode,
 ): Promise<ReturnType<typeof createStreamableUI>> => {
-  if (!config) {
+  if (!callbackManager) {
     throw new Error("Callback manager is not defined");
   }
 
@@ -109,7 +109,7 @@ export const createRunnableUI = async (
     return ui;
   }).withConfig({ runName: STREAM_UI_RUN_NAME });
 
-  return lambda.invoke(initialValue, { callbacks: config.getChild() });
+  return lambda.invoke(initialValue, { callbacks: callbackManager.getChild() });
 };
 
 /**
