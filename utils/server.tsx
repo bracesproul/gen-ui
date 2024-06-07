@@ -71,7 +71,7 @@ export function streamRunnableUI<RunInput, RunOutput>(
 
     // resolve the promise, which will be sent
     // to the client thanks to RSC
-    resolve(lastEventValue?.data.output["invokeModel"]["result"] ?? "");
+    resolve(lastEventValue?.data.output);
 
     Object.values(callbacks).forEach((cb) => cb.done());
     ui.done();

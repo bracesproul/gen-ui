@@ -73,14 +73,22 @@ export default function Chat() {
     // after which we can append to our chat history state
     (async () => {
       let lastEvent = await element.lastEvent;
-      if (typeof lastEvent === "string" && lastEvent !== "") {
-        setHistory((prev) => [
-          ...prev,
-          ["user", input],
-          ["assistant", lastEvent],
-        ]);
-      } else {
-        setHistory((prev) => [...prev, ["user", input]]);
+      if (typeof lastEvent === "object") {
+        if (lastEvent["invokeModel"]["result"]) {
+          setHistory((prev) => [
+            ...prev,
+            ["user", input],
+            ["assistant", lastEvent["invokeModel"]["result"]],
+          ]);
+        } else if (lastEvent["invokeTools"]) {
+          setHistory((prev) => [
+            ...prev,
+            ["user", input],
+            ["assistant", `Tool result: ${JSON.stringify(lastEvent["invokeTools"]["toolResult"], null)}`],
+          ]);
+        } else {
+          console.log("ELSE!", lastEvent)
+        }
       }
     })();
 
