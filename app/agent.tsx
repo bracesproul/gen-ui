@@ -1,8 +1,6 @@
-import "server-only";
-
-import { agentExecutor } from "../ai/graph";
-import { exposeEndpoints, streamRunnableUI } from "../utils/server";
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
+import { agentExecutor } from "@/ai/graph";
+import { exposeEndpoints, streamRunnableUI } from "@/utils/server";
+import { HumanMessage, AIMessage } from "@langchain/core/messages";
 
 const convertChatHistoryToMessages = (
   chat_history: [role: string, content: string][],
