@@ -14,14 +14,14 @@ It comes pre-built with a few UI features which you can use to play about with g
 First, clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/bracesprou/gen-ui.git
+git clone https://github.com/bracesproul/gen-ui.git
 
 cd gen-ui
 
 yarn install
 ```
 
-Next, if you plan on using the existing pre-built UI components, you'll need to set a few enviroment variables:
+Next, if you plan on using the existing pre-built UI components, you'll need to set a few environment variables:
 
 Copy the [`.env.example`](./.env.example) file to `.env`:
 
@@ -69,5 +69,6 @@ yarn build
 
 If you're interested in ways to take this demo application further, I'd consider the following:
 
-- A custom LangGraph agent instead of the default `AgentExecutor` amd `createToolCallingAgent`
-- Adding a "classifier" step before the tool call, with a small fast model (e.g Claude 3 Haiku) which selects the tool call/component first. This would improve overall latency for the time to first UI (with the loading state component).
+- Generating entire React components to be rendered, instead of relying on pre-built components. OR: Using the LLM to build custom components using a UI library like [Shadcn](https://ui.shadcn.com/).
+- Multi-tool and component usage. Update the LangGraph agent to call multiple tools, and appending multiple different UI components to the client rendered UI.
+- Generative UI outside of the chatbot window. Have the UI dynamically render in different areas on the screen. E.g a dashboard, where the components are dynamically rendered based on the LLMs output.
