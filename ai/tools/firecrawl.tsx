@@ -39,7 +39,7 @@ export async function webData(input: z.infer<typeof webSchema>) {
   };
 }
 
-export const firecrawlTool = new DynamicStructuredTool({
+export const websiteDataTool = new DynamicStructuredTool({
   name: "get_web_data",
   description: "A tool to fetch the current website data, given a url.",
   schema: webSchema,
