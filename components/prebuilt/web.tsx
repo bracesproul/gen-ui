@@ -1,10 +1,7 @@
 "use client";
 
 import { Card } from "../ui/card";
-import { format } from "date-fns";
-import { Progress } from "../ui/progress";
 import { Skeleton } from "../ui/skeleton";
-import Image from "next/image";
 
 export interface CurrentWebProps {
   url: string;
