@@ -5,7 +5,7 @@ import {
   ChatPromptTemplate,
   MessagesPlaceholder,
 } from "@langchain/core/prompts";
-import { githubTool, invoiceTool, weatherTool } from "./tools";
+import { githubTool, invoiceTool, weatherTool, firecrawlTool } from "./tools";
 import { ChatOpenAI } from "@langchain/openai";
 
 interface AgentExecutorState {
@@ -31,7 +31,7 @@ interface AgentExecutorState {
 
 const invokeModel = async (
   state: AgentExecutorState,
-  config?: RunnableConfig,
+  config?: RunnableConfig
 ): Promise<Partial<AgentExecutorState>> => {
   const initialPrompt = ChatPromptTemplate.fromMessages([
     [
@@ -46,7 +46,7 @@ Your job is to determine whether or not you have a tool which can handle the use
     ["human", "{input}"],
   ]);
 
-  const tools = [githubTool, invoiceTool, weatherTool];
+  const tools = [githubTool, invoiceTool, weatherTool, firecrawlTool];
 
   const llm = new ChatOpenAI({
     temperature: 0,
@@ -59,7 +59,7 @@ Your job is to determine whether or not you have a tool which can handle the use
       input: state.input,
       chat_history: state.chat_history,
     },
-    config,
+    config
   );
 
   if (result.tool_calls && result.tool_calls.length > 0) {
@@ -87,7 +87,7 @@ const invokeToolsOrReturn = (state: AgentExecutorState) => {
 
 const invokeTools = async (
   state: AgentExecutorState,
-  config?: RunnableConfig,
+  config?: RunnableConfig
 ): Promise<Partial<AgentExecutorState>> => {
   if (!state.toolCall) {
     throw new Error("No tool call found.");
@@ -96,6 +96,7 @@ const invokeTools = async (
     [githubTool.name]: githubTool,
     [invoiceTool.name]: invoiceTool,
     [weatherTool.name]: weatherTool,
+    [firecrawlTool.name]: firecrawlTool,
   };
 
   const selectedTool = toolMap[state.toolCall.name];
@@ -104,7 +105,7 @@ const invokeTools = async (
   }
   const toolResult = await selectedTool.invoke(
     state.toolCall.parameters,
-    config,
+    config
   );
   return {
     toolResult: JSON.parse(toolResult),
