@@ -1,7 +1,7 @@
-import { CurrentWebLoading, CurrentWeb } from "@/components/prebuilt/web";
+import { WebLoading, Web } from "@/components/prebuilt/web";
 import { createRunnableUI } from "@/utils/server";
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import FirecrawlApp from "@mendable/firecrawl-js";
+import { FireCrawlLoader } from "@langchain/community/document_loaders/web/firecrawl";
 import { z } from "zod";
 
 export const webSchema = z.object({
@@ -9,33 +9,25 @@ export const webSchema = z.object({
 });
 
 export async function webData(input: z.infer<typeof webSchema>) {
-  const firecrawlApiKey = process.env.FIRECRAWL_API_KEY;
-  if (!firecrawlApiKey) {
-    throw new Error("Missing FIRECRAWL_API_KEY secret.");
-  }
-  // Initialize the FirecrawlApp with your API key
-  const app = new FirecrawlApp({ apiKey: firecrawlApiKey });
-
-  // Scrape a single URL
-  const url = input.url;
-
-  const params = {
-    pageOptions: {
-      screenshot: true,
+  // Initialize the FireCrawlLoader
+  const firecrawl = new FireCrawlLoader({
+    url: input.url,
+    mode: "scrape",
+    params: {
+      pageOptions: {
+        screenshot: true,
+      },
     },
-  };
+    apiKey: process.env.FIRECRAWL_API_KEY,
+  });
 
-  const scrapedData = await app.scrapeUrl(url, params);
-
-  const title = await scrapedData.data.metadata.title;
-  const description = await scrapedData.data.metadata.description;
-  const screenshot = await scrapedData.data.metadata.screenshot;
+  const [scrapedData] = await firecrawl.load();
 
   return {
     ...input,
-    title,
-    description,
-    screenshot,
+    title: scrapedData.metadata.title,
+    description: scrapedData.metadata.description,
+    screenshot: scrapedData.metadata.screenshot,
   };
 }
 
@@ -44,9 +36,9 @@ export const websiteDataTool = new DynamicStructuredTool({
   description: "A tool to fetch the current website data, given a url.",
   schema: webSchema,
   func: async (input, config) => {
-    const stream = await createRunnableUI(config, <CurrentWebLoading />);
+    const stream = await createRunnableUI(config, <WebLoading />);
     const data = await webData(input);
-    stream.done(<CurrentWeb {...data} />);
+    stream.done(<Web {...data} />);
     return JSON.stringify(data, null);
   },
 });

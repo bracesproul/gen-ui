@@ -31,7 +31,7 @@ interface AgentExecutorState {
 
 const invokeModel = async (
   state: AgentExecutorState,
-  config?: RunnableConfig
+  config?: RunnableConfig,
 ): Promise<Partial<AgentExecutorState>> => {
   const initialPrompt = ChatPromptTemplate.fromMessages([
     [
@@ -59,7 +59,7 @@ Your job is to determine whether or not you have a tool which can handle the use
       input: state.input,
       chat_history: state.chat_history,
     },
-    config
+    config,
   );
 
   if (result.tool_calls && result.tool_calls.length > 0) {
@@ -87,7 +87,7 @@ const invokeToolsOrReturn = (state: AgentExecutorState) => {
 
 const invokeTools = async (
   state: AgentExecutorState,
-  config?: RunnableConfig
+  config?: RunnableConfig,
 ): Promise<Partial<AgentExecutorState>> => {
   if (!state.toolCall) {
     throw new Error("No tool call found.");
@@ -105,7 +105,7 @@ const invokeTools = async (
   }
   const toolResult = await selectedTool.invoke(
     state.toolCall.parameters,
-    config
+    config,
   );
   return {
     toolResult: JSON.parse(toolResult),

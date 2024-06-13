@@ -3,14 +3,14 @@
 import { Card } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
 
-export interface CurrentWebProps {
+export interface WebProps {
   url: string;
   title: string;
   description: string;
   screenshot: string;
 }
 
-export function CurrentWebLoading() {
+export function WebLoading() {
   return (
     <Card className="w-[325px] max-w-[325px] p-4 h-[350px] max-h-[350px] flex flex-col text-gray-50 bg-white">
       <div className="text-left mb-4">
@@ -26,7 +26,7 @@ export function CurrentWebLoading() {
   );
 }
 
-export function CurrentWeb(props: CurrentWebProps) {
+export function Web(props: WebProps) {
   const cleanUrl = props.url
     .replace("https://", "")
     .replace("http://", "")
