@@ -10,6 +10,7 @@
     "format": "yarn prettier --write ./app ./ai ./components ./utils ./lib"
   },
   "dependencies": {
+    "@langchain/community": "^0.2.10",
     "@langchain/core": "^0.2.6",
     "@langchain/langgraph": "^0.0.22",
     "@langchain/openai": "^0.0.34",
