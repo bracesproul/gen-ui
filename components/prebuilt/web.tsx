@@ -44,7 +44,7 @@ export function Web(props: WebProps) {
             width={300}
             height={200}
             src={props.screenshot}
-            alt="Screenshot of the website"
+            alt="The screenshot of the website"
           />
         </div>
         <div className="flex justify-between items-center mb-1">
