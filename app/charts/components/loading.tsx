@@ -10,7 +10,7 @@ export function LoadingPieChart(): JSX.Element {
 
 export function LoadingBarChart(): JSX.Element {
   return (
-    <div className="flex flex-col gap-2 items-start justify-end">
+    <div className="flex flex-col gap-2 items-start justify-end border-l-[0.5px] border-b-[0.5px] border-gray-300 rounded-md p-2">
       <Skeleton className="h-16 w-[85%]" />
       <Skeleton className="h-16 w-[60%]" />
       <Skeleton className="h-16 w-[90%]" />

@@ -123,6 +123,12 @@ export default function DynamicCharts() {
       orders,
     });
 
+    const newElements = [
+      <div className="w-full h-full flex flex-col p-6 mx-auto">
+        {element.ui}
+      </div>,
+    ];
+
     // consume the value stream so we can be sure the graph has finished.
     (async () => {
       const lastEvent = await element.lastEvent;
@@ -133,7 +139,7 @@ export default function DynamicCharts() {
     })();
 
     setLoading(false);
-    setElements([element.ui]);
+    setElements(newElements);
   };
 
   const handleFilterXAxis = (key: string) => {
