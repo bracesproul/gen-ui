@@ -60,8 +60,11 @@ export interface Order {
   orderedAt: Date;
 }
 
-export const filterSchema = (productNames: string[]) =>
-  z
+export const filterSchema = (productNames: string[]) => {
+  const productNamesAsString = productNames
+    .map((p) => p.toLowerCase())
+    .join(", ");
+  return z
     .object({
       productNames: z
         .array(
@@ -71,15 +74,23 @@ export const filterSchema = (productNames: string[]) =>
           ]),
         )
         .optional()
-        .describe("Filter orders by the product name."),
+        .describe(
+          `Filter orders by the product name. Lowercase only. MUST only be a list of the following products: ${productNamesAsString}`,
+        ),
       beforeDate: z
-        .date()
+        .string()
+        .transform((str) => new Date(str))
         .optional()
-        .describe("Filter orders placed before this date."),
+        .describe(
+          "Filter orders placed before this date. Must be a valid date in the format 'YYYY-MM-DD'",
+        ),
       afterDate: z
-        .date()
+        .string()
+        .transform((str) => new Date(str))
         .optional()
-        .describe("Filter orders placed after this date."),
+        .describe(
+          "Filter orders placed after this date. Must be a valid date in the format 'YYYY-MM-DD'",
+        ),
       minAmount: z
         .number()
         .optional()
@@ -119,6 +130,7 @@ export const filterSchema = (productNames: string[]) =>
         .describe("The current status of the order."),
     })
     .describe("Available filters to apply to orders.");
+};
 
 export interface Filter {
   productNames?: string[];

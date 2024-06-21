@@ -4,20 +4,29 @@ import { StateGraph, START, END } from "@langchain/langgraph";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { ChatOpenAI } from "@langchain/openai";
 import { Filter, Order, filterSchema } from "./schema";
-import { BarChart, BarChartProps, PieChart, PieChartProps } from "@/lib/mui";
 import {
-  constructStateBarChartProps,
-  constructStatusPieChartProps,
-  constructTotalAmountBarChartProps,
-  constructTotalDiscountBarChartProps,
+  BarChart,
+  BarChartProps,
+  LineChart,
+  LineChartProps,
+  PieChart,
+  PieChartProps,
+} from "@/lib/mui";
+import {
+  ChartType,
+  DATA_DISPLAY_TYPES_AND_DESCRIPTIONS_MAP,
+  DataDisplayTypeAndDescription,
+  filterOrders,
 } from "./filters";
 import { format } from "date-fns";
-import { FilterButton } from "../components/filter";
-import { LoadingBarChart, LoadingPieChart } from "../components/loading";
+import { FilterButton } from "../../../components/prebuilt/filter";
+import {
+  LoadingBarChart,
+  LoadingLineChart,
+  LoadingPieChart,
+} from "../../../components/prebuilt/loading-charts";
 import { createRunnableUI } from "@/utils/server";
 import { createStreamableUI } from "ai/rsc";
-
-export type ChartType = "bar" | "line" | "pie";
 
 interface AgentExecutorState {
   input: string;
@@ -41,63 +50,7 @@ interface AgentExecutorState {
    * The props to pass to the chart component.
    */
   props?: BarChartProps | Record<string, any>;
-  /**
-   * The UI stream for adding elements to the page.
-   */
-  ui: ReturnType<typeof createStreamableUI>;
 }
-
-type DataDisplayTypeAndDescription = {
-  /**
-   * The name of the data display type.
-   */
-  name: string;
-  /**
-   * The type of chart which this format can be displayed on.
-   */
-  chartType: ChartType;
-  /**
-   * The description of the data display type.
-   */
-  description: string;
-  /**
-   * The function to use to construct the props for the chart.
-   */
-  propsFunction?: (orders: Order[]) => BarChartProps | PieChartProps;
-};
-
-const DATA_DISPLAY_TYPES_AND_DESCRIPTIONS_MAP: {
-  [name: string]: DataDisplayTypeAndDescription;
-} = {
-  totalAmount: {
-    name: "totalAmount",
-    description:
-      "Sort by total dollar amount of orders, grouping by product name.",
-    chartType: "bar",
-    propsFunction: constructTotalAmountBarChartProps,
-  },
-  state: {
-    name: "state",
-    description:
-      "Sort by total dollar amount of orders, grouping by the state the order was shipped to.",
-    chartType: "bar",
-    propsFunction: constructStateBarChartProps,
-  },
-  totalDiscount: {
-    name: "totalDiscount",
-    description:
-      "Show the percentage of total order amount that was discounted, and the remaining percentage that was not discounted. Group by product name.",
-    chartType: "bar",
-    propsFunction: constructTotalDiscountBarChartProps,
-  },
-  status: {
-    name: "status",
-    description:
-      "Show the percentage of orders in each status, grouping by order status.",
-    chartType: "pie",
-    propsFunction: constructStatusPieChartProps,
-  },
-};
 
 const formatDataDisplayTypesAndDescriptions = (
   dataDisplayTypesAndDescriptions: Array<DataDisplayTypeAndDescription>,
@@ -117,7 +70,6 @@ export function graphAgentExecutor() {
       chartType: null,
       displayFormat: null,
       props: null,
-      ui: null,
     },
   })
     .addNode("generateFilters", agent.generateFilters.bind(agent)) // Generate the filters
@@ -155,7 +107,6 @@ class AgentExecutorGraph {
 
   async constructChartProps(
     state: AgentExecutorState,
-    config?: RunnableConfig,
   ): Promise<Partial<AgentExecutorState>> {
     if (!state.chartType) {
       throw new Error("ChartType is required to filter data.");
@@ -176,6 +127,8 @@ class AgentExecutorGraph {
       ui.update(<BarChart {...(props as BarChartProps)} />);
     } else if (state.chartType === "pie") {
       ui.update(<PieChart {...(props as PieChartProps)} />);
+    } else if (state.chartType === "line") {
+      ui.update(<LineChart {...(props as LineChartProps)} />);
     }
     ui.done();
 
@@ -184,85 +137,14 @@ class AgentExecutorGraph {
     };
   }
 
-  async filterData(
-    state: AgentExecutorState,
-  ): Promise<Partial<AgentExecutorState>> {
+  filterData(state: AgentExecutorState): Partial<AgentExecutorState> {
     if (!state.selectedFilters) {
       throw new Error("Can not filter orders without selected filters.");
     }
-
-    const {
-      productNames,
-      beforeDate,
-      afterDate,
-      minAmount,
-      maxAmount,
-      state: orderState,
-      city,
-      discount,
-      minDiscountPercentage,
-      status,
-    } = state.selectedFilters;
-
-    if (minDiscountPercentage !== undefined && discount === false) {
-      throw new Error(
-        "Can not filter by minDiscountPercentage when discount is false.",
-      );
-    }
-
-    let filteredOrders = state.orders.filter((order) => {
-      let isMatch = true;
-
-      if (
-        productNames &&
-        !productNames.includes(order.productName.toLowerCase())
-      ) {
-        isMatch = false;
-      }
-
-      if (beforeDate && order.orderedAt > beforeDate) {
-        isMatch = false;
-      }
-      if (afterDate && order.orderedAt < afterDate) {
-        isMatch = false;
-      }
-      if (minAmount && order.amount < minAmount) {
-        isMatch = false;
-      }
-      if (maxAmount && order.amount > maxAmount) {
-        isMatch = false;
-      }
-      if (
-        orderState &&
-        order.address.state.toLowerCase() !== orderState.toLowerCase()
-      ) {
-        isMatch = false;
-      }
-      if (city && order.address.city.toLowerCase() !== city.toLowerCase()) {
-        isMatch = false;
-      }
-      if (
-        discount !== undefined &&
-        (order.discount === undefined) !== discount
-      ) {
-        isMatch = false;
-      }
-      if (
-        minDiscountPercentage !== undefined &&
-        (order.discount === undefined || order.discount < minDiscountPercentage)
-      ) {
-        isMatch = false;
-      }
-      if (status && order.status.toLowerCase() !== status) {
-        isMatch = false;
-      }
-
-      return isMatch;
+    return filterOrders({
+      orders: state.orders,
+      selectedFilters: state.selectedFilters,
     });
-
-    return {
-      orders: filteredOrders,
-    };
   }
 
   async generateDataDisplayFormat(
@@ -297,7 +179,10 @@ class AgentExecutorGraph {
           .enum([
             Object.values(DATA_DISPLAY_TYPES_AND_DESCRIPTIONS_MAP)[0].name,
             ...Object.values(DATA_DISPLAY_TYPES_AND_DESCRIPTIONS_MAP)
-              .slice(1)
+              .slice(
+                1,
+                Object.values(DATA_DISPLAY_TYPES_AND_DESCRIPTIONS_MAP).length,
+              )
               .map(({ name }) => name),
           ])
           .describe("The format to display the data in."),
@@ -355,8 +240,7 @@ class AgentExecutorGraph {
     const filterSchema = z
       .object({
         chartType: z
-          // .enum(["bar", "line", "pie"])
-          .enum(["bar", "pie"])
+          .enum(["bar", "line", "pie"])
           .describe("The type of chart to display the data."),
       })
       .describe(
@@ -386,6 +270,8 @@ class AgentExecutorGraph {
       ui.append(<LoadingBarChart />);
     } else if (result.chartType === "pie") {
       ui.append(<LoadingPieChart />);
+    } else if (result.chartType === "line") {
+      ui.append(<LoadingLineChart />);
     }
 
     return result;
@@ -469,7 +355,7 @@ class AgentExecutorGraph {
       },
     );
     const buttonsDiv = (
-      <div className="flex flex-wrap gap-2">{filterButtons}</div>
+      <div className="flex flex-wrap gap-2 px-6">{filterButtons}</div>
     );
     const ui = await this.getUi(config);
     ui.update(buttonsDiv);

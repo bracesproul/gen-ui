@@ -2,22 +2,25 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { BarChart, BarChartProps, PieChartProps, PieChart } from "@/lib/mui";
-import { useEffect, useState } from "react";
+import { BarChart, LineChart, PieChart } from "@/lib/mui";
+import { Suspense, useEffect, useState } from "react";
 import { useActions } from "@/utils/client";
 import { EndpointsContext } from "./agent";
-import { Order } from "./ai/schema";
+import { Filter, Order, filterSchema } from "./ai/schema";
 import { LocalContext } from "../shared";
 import { generateOrders } from "./generate-orders";
-import { ChartType } from "./ai/graph";
 import {
-  FILTERS_MAP,
+  ChartType,
+  DATA_DISPLAY_TYPES_AND_DESCRIPTIONS_MAP,
+  constructByDateLineChartProps,
   constructStateBarChartProps,
   constructStatusPieChartProps,
   constructTotalAmountBarChartProps,
   constructTotalDiscountBarChartProps,
 } from "./ai/filters";
-import { XAxisFilter } from "./components/filter";
+import { XAxisFilter } from "../../components/prebuilt/filter";
+import { useSearchParams, useRouter } from "next/navigation";
+import { filterOrders } from "./ai/filters";
 
 const SparklesIcon = () => (
   <svg
@@ -87,11 +90,41 @@ function SmartFilter(props: SmartFilterProps) {
 
 const LOCAL_STORAGE_ORDERS_KEY = "orders";
 
-export default function DynamicCharts() {
+const getFiltersFromUrl = (
+  searchParams: URLSearchParams,
+  orders: Order[],
+): Partial<Filter> => {
+  const productNames = Array.from(
+    new Set<string>(orders.map(({ productName }) => productName)),
+  );
+  const possibleFilters = filterSchema(productNames);
+  const filterKeys = Object.keys(possibleFilters.shape);
+  const filters: Record<string, any> = {};
+
+  filterKeys.forEach((key) => {
+    const value = searchParams.get(key);
+    if (value) {
+      try {
+        filters[key as any] = decodeURIComponent(value);
+      } catch (error) {
+        console.error(`Error parsing URL parameter for ${key}:`, error);
+      }
+    }
+  });
+
+  return filters;
+};
+
+function ChartContent() {
   const actions = useActions<typeof EndpointsContext>();
+  const searchParams = useSearchParams();
+  const { push } = useRouter();
+
   const [loading, setLoading] = useState(false);
   const [elements, setElements] = useState<JSX.Element[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [selectedFilters, setSelectedFilters] = useState<Partial<Filter>>();
+  const [selectedChartType, setSelectedChartType] = useState<ChartType>("pie");
 
   useEffect(() => {
     if (orders.length > 0) {
@@ -111,9 +144,76 @@ export default function DynamicCharts() {
       ordersV = JSON.parse(localStorageOrders);
       setOrders(ordersV);
     }
-    const chartProps = constructTotalAmountBarChartProps(ordersV);
-    setElements([<BarChart {...chartProps} />]);
-  }, []);
+
+    // Set the chart on fresh load. Use either the chartType from the URL or the default.
+    // Also extract any filters to apply to the chart.
+    const selectedChart = searchParams.get("chartType") || selectedChartType;
+    const filters = getFiltersFromUrl(searchParams, ordersV);
+    const { orders: filteredOrders } = filterOrders({
+      orders: ordersV,
+      selectedFilters: filters,
+    });
+    switch (selectedChart) {
+      case "bar":
+        setElements([
+          <BarChart
+            {...constructTotalAmountBarChartProps(filteredOrders ?? ordersV)}
+            key="start-bar"
+          />,
+        ]);
+        break;
+      case "pie":
+        return setElements([
+          <PieChart
+            {...constructStatusPieChartProps(filteredOrders ?? ordersV)}
+            key="start-pie"
+          />,
+        ]);
+      case "line":
+        return setElements([
+          <LineChart
+            {...constructByDateLineChartProps(filteredOrders ?? ordersV)}
+            key="start-line"
+          />,
+        ]);
+    }
+  }, [orders.length, searchParams, selectedChartType]);
+
+  useEffect(() => {
+    if (!selectedFilters) return;
+
+    const params = Object.fromEntries(searchParams.entries());
+    let paramsToAdd: { [key: string]: string } = {};
+
+    Object.entries({
+      ...selectedFilters,
+      chartType: searchParams.get("chartType") ?? selectedChartType,
+    }).forEach(([key, value]) => {
+      const searchValue = params[key];
+      let encodedValue: string | undefined = undefined;
+      if (Array.isArray(value)) {
+        encodedValue = encodeURIComponent(JSON.stringify(value));
+      } else if (typeof value === "object") {
+        if (Object.keys(value).length > 0) {
+          encodedValue = encodeURIComponent(value.toISOString());
+        }
+        // no-op if value is empty
+      } else if (["string", "number", "boolean"].includes(typeof value)) {
+        encodedValue = encodeURIComponent(value as string | number | boolean);
+      } else {
+        throw new Error(`Invalid value type ${JSON.stringify(value)}`);
+      }
+      if (
+        (encodedValue !== undefined && !searchValue) ||
+        searchValue !== encodedValue
+      ) {
+        paramsToAdd[key] = encodedValue as string;
+      }
+    });
+
+    if (Object.keys(paramsToAdd).length === 0) return;
+    push(`/charts?${new URLSearchParams({ ...params, ...paramsToAdd })}`);
+  }, [selectedFilters, searchParams, selectedChartType, push]);
 
   const handleSubmitSmartFilter = async (input: string) => {
     setLoading(true);
@@ -124,7 +224,7 @@ export default function DynamicCharts() {
     });
 
     const newElements = [
-      <div className="w-full h-full flex flex-col p-6 mx-auto">
+      <div key={`${input}`} className="w-full h-full flex flex-col p-6 mx-auto">
         {element.ui}
       </div>,
     ];
@@ -135,10 +235,12 @@ export default function DynamicCharts() {
       if (typeof lastEvent === "string") {
         throw new Error("lastEvent is a string. Something has gone wrong.");
       }
-      console.log(lastEvent);
+      const { generateFilters, generateChartType } = lastEvent;
+      setSelectedFilters(generateFilters.selectedFilters);
+      setSelectedChartType(generateChartType.chartType);
+      setLoading(false);
     })();
 
-    setLoading(false);
     setElements(newElements);
   };
 
@@ -146,19 +248,38 @@ export default function DynamicCharts() {
     switch (key) {
       case "totalAmount":
         return setElements([
-          <BarChart {...constructTotalAmountBarChartProps(orders)} />,
+          <BarChart
+            key={`manual-filter-select-${key}`}
+            {...constructTotalAmountBarChartProps(orders)}
+          />,
         ]);
       case "state":
         return setElements([
-          <BarChart {...constructStateBarChartProps(orders)} />,
+          <BarChart
+            key={`manual-filter-select-${key}`}
+            {...constructStateBarChartProps(orders)}
+          />,
         ]);
       case "totalDiscount":
         return setElements([
-          <BarChart {...constructTotalDiscountBarChartProps(orders)} />,
+          <BarChart
+            key={`manual-filter-select-${key}`}
+            {...constructTotalDiscountBarChartProps(orders)}
+          />,
         ]);
       case "status":
         return setElements([
-          <PieChart {...constructStatusPieChartProps(orders)} />,
+          <PieChart
+            key={`manual-filter-select-${key}`}
+            {...constructStatusPieChartProps(orders)}
+          />,
+        ]);
+      case "ordersByMonth":
+        return setElements([
+          <LineChart
+            key={`manual-filter-select-${key}`}
+            {...constructByDateLineChartProps(orders)}
+          />,
         ]);
       default:
         throw new Error("Invalid key");
@@ -171,7 +292,7 @@ export default function DynamicCharts() {
         <div className="flex flex-row w-full gap-1 items-center justify-center px-12">
           <XAxisFilter
             onFilter={handleFilterXAxis}
-            keys={Object.keys(FILTERS_MAP)}
+            keys={Object.keys(DATA_DISPLAY_TYPES_AND_DESCRIPTIONS_MAP)}
           />
           <div className="ml-auto w-[300px]">
             <SmartFilter loading={loading} onSubmit={handleSubmitSmartFilter} />
@@ -180,5 +301,13 @@ export default function DynamicCharts() {
         <div className="w-3xl h-[500px]">{elements}</div>
       </LocalContext.Provider>
     </div>
+  );
+}
+
+export default function DynamicCharts() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ChartContent />
+    </Suspense>
   );
 }
