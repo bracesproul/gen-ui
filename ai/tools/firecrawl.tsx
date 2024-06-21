@@ -35,7 +35,7 @@ export const websiteDataTool = new DynamicStructuredTool({
   name: "get_web_data",
   description: "A tool to fetch the current website data, given a url.",
   schema: webSchema,
-  func: async (input, config) => {
+  func: async (input, _, config) => {
     const stream = await createRunnableUI(config, <WebLoading />);
     const data = await webData(input);
     stream.done(<Web {...data} />);

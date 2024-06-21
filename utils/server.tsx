@@ -2,18 +2,36 @@ import "server-only";
 
 import { ReactNode, isValidElement } from "react";
 import { AIProvider } from "./client";
-import {
-  CallbackManagerForToolRun,
-  CallbackManagerForRetrieverRun,
-  CallbackManagerForChainRun,
-} from "@langchain/core/callbacks/manager";
 import { createStreamableUI, createStreamableValue } from "ai/rsc";
-import { Runnable, RunnableLambda } from "@langchain/core/runnables";
+import {
+  Runnable,
+  RunnableConfig,
+  RunnableLambda,
+} from "@langchain/core/runnables";
 import { CompiledStateGraph } from "@langchain/langgraph";
 import { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { AIMessage } from "@/ai/message";
 
 const STREAM_UI_RUN_NAME = "stream_runnable_ui";
+
+const removeUiFromObject = (obj: Record<string, any>) => {
+  const newObj = { ...obj };
+
+  if ("ui" in newObj) {
+    delete newObj.ui;
+  }
+
+  const keys = Object.keys(newObj);
+  for (const key of keys) {
+    if (key === "ui") {
+      delete newObj.ui;
+    } else if (typeof newObj[key] === "object") {
+      newObj[key] = removeUiFromObject(newObj[key]);
+    }
+  }
+
+  return newObj;
+};
 
 /**
  * Executes `streamEvents` method on a runnable
@@ -29,7 +47,7 @@ export function streamRunnableUI<RunInput, RunOutput>(
   inputs: RunInput,
 ) {
   const ui = createStreamableUI();
-  const [lastEvent, resolve] = withResolvers<string>();
+  const [lastEvent, resolve] = withResolvers<string | Record<string, any>>();
 
   (async () => {
     let lastEventValue: StreamEvent | null = null;
@@ -73,6 +91,9 @@ export function streamRunnableUI<RunInput, RunOutput>(
       lastEventValue = streamEvent;
     }
 
+    // If UI is being passed around as state anywhere, we must remove it before sending it to the client
+    // TODO: Can I do this before resolving the langgraph graph?
+    lastEventValue = removeUiFromObject(lastEventValue ?? {}) as StreamEvent;
     // resolve the promise, which will be sent
     // to the client thanks to RSC
     resolve(lastEventValue?.data.output);
@@ -93,14 +114,10 @@ export function streamRunnableUI<RunInput, RunOutput>(
  * @returns Vercel AI RSC compatible streamable UI
  */
 export const createRunnableUI = async (
-  callbackManager:
-    | CallbackManagerForToolRun
-    | CallbackManagerForRetrieverRun
-    | CallbackManagerForChainRun
-    | undefined,
+  config?: RunnableConfig,
   initialValue?: React.ReactNode,
 ): Promise<ReturnType<typeof createStreamableUI>> => {
-  if (!callbackManager) {
+  if (!config) {
     throw new Error("Callback manager is not defined");
   }
 
@@ -109,7 +126,7 @@ export const createRunnableUI = async (
     return ui;
   }).withConfig({ runName: STREAM_UI_RUN_NAME });
 
-  return lambda.invoke(initialValue, { callbacks: callbackManager.getChild() });
+  return lambda.invoke(initialValue, config);
 };
 
 /**

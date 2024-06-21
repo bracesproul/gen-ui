@@ -64,7 +64,7 @@ export const weatherTool = new DynamicStructuredTool({
   description:
     "A tool to fetch the current weather, given a city and state. If the city/state is not provided, ask the user for both the city and state.",
   schema: weatherSchema,
-  func: async (input, config) => {
+  func: async (input, _, config) => {
     const stream = await createRunnableUI(config, <CurrentWeatherLoading />);
     const data = await weatherData(input);
     stream.done(<CurrentWeather {...data} />);
