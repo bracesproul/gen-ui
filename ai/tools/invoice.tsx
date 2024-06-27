@@ -56,7 +56,7 @@ export const invoiceTool = new DynamicStructuredTool({
   description:
     "A tool to fetch the invoice from an order. This should only be called if a user uploads an image/receipt of an order.",
   schema: InvoiceSchema,
-  func: async (input, config) => {
+  func: async (input, _, config) => {
     const stream = await createRunnableUI(config, <InvoiceLoading />);
     stream.done(<Invoice {...input} />);
     return JSON.stringify(input, null);
