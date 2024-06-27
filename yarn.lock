@@ -188,10 +188,10 @@
     zod "^3.22.4"
     zod-to-json-schema "^3.22.3"
 
-"@langchain/langgraph@^0.0.22":
-  version "0.0.22"
-  resolved "https://registry.yarnpkg.com/@langchain/langgraph/-/langgraph-0.0.22.tgz#2426f37ffa62df729d02961a4cefd82ae15e777a"
-  integrity sha512-VdWUDRo/CXe1SjR34WxtbIwxIykSKjbdduKaNxCIPCZYxhfeL+NY3xi3F8ES6RTQV9gNYrl6ODuuXQtACQpK7g==
+"@langchain/langgraph@^0.0.25":
+  version "0.0.25"
+  resolved "https://registry.yarnpkg.com/@langchain/langgraph/-/langgraph-0.0.25.tgz#2582d8652e2dda722f0c5043c1d0254a778e2486"
+  integrity sha512-DiTnB5Psm0y7TSgHdK4r/r+xzLohbN4zMQL+5Wk3EmOGX45ioBp98AqL8hYdyxKgHM6cjoIFHavHF7EhMg+ugQ==
   dependencies:
     "@langchain/core" ">0.1.61 <0.3.0"
     uuid "^9.0.1"
