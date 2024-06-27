@@ -202,7 +202,7 @@ class AgentExecutorGraph {
       {
         chartType: state.chartType,
         magicFilterInput: state.input,
-        selectedFilters: state.selectedFilters,
+        selectedFilters: JSON.stringify(state.selectedFilters),
         dataDisplayTypesAndDescriptions: formatDataDisplayTypesAndDescriptions(
           Object.values(DATA_DISPLAY_TYPES_AND_DESCRIPTIONS_MAP),
         ),
@@ -257,7 +257,7 @@ class AgentExecutorGraph {
     const result = await chain.invoke(
       {
         magicFilterInput: state.input,
-        selectedFilters: state.selectedFilters,
+        selectedFilters: JSON.stringify(state.selectedFilters),
         dataDisplayTypesAndDescriptions: formatDataDisplayTypesAndDescriptions(
           Object.values(DATA_DISPLAY_TYPES_AND_DESCRIPTIONS_MAP),
         ),
