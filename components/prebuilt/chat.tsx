@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { EndpointsContext } from "@/app/agent";
 import { useActions } from "@/utils/client";
 import { LocalContext } from "@/app/shared";
 import { HumanMessageText } from "./message";
+import { Paperclip, FileText, Image, Video } from "lucide-react";
 
 export interface ChatProps {}
 
@@ -102,37 +103,46 @@ export default function Chat() {
   }
 
   return (
-    <div className="w-[70vw] overflow-y-scroll h-[80vh] flex flex-col gap-4 mx-auto border-[1px] border-gray-200 rounded-lg p-3 shadow-sm bg-gray-50/25">
-      <LocalContext.Provider value={onSubmit}>
-        <div className="flex flex-col w-full gap-1 mt-auto">{elements}</div>
+    <div className=" overflow-y-scroll w-full h-screen max-h-dvh flex flex-col gap-4 mx-autorounded-lg p-3 shadow-sm">
+      <header className="p-4">
+        <h1 className="text-lg font-semibold">ChatHKT</h1>
+      </header>
+      
+      <LocalContext.Provider value={onSubmit} >
+        <ul className="flex flex-col w-[80%] gap-1 mt-auto container overflow-y-auto">{elements}</ul>
       </LocalContext.Provider>
+      
       <form
         onSubmit={async (e) => {
           e.stopPropagation();
           e.preventDefault();
           await onSubmit(input);
         }}
-        className="w-full flex flex-row gap-2"
+        className="flex flex-row gap-2 container w-[80%] bg-transparent"
       >
+        
+        <label className="flex items-center cursor-pointer">
+            <Image />
+            <Input
+              id="image"
+              type="file"
+              accept="image/*"
+              className="w-0 p-0 m-0"
+              onChange={(e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                  setSelectedFile(e.target.files[0]);
+                }
+              }}
+            />
+          </label>
         <Input
-          placeholder="What's the weather like in San Francisco?"
+          placeholder="Enter your question"
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          className="rounded-xl"
         />
-        <div className="w-[300px]">
-          <Input
-            placeholder="Upload"
-            id="image"
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              if (e.target.files && e.target.files.length > 0) {
-                setSelectedFile(e.target.files[0]);
-              }
-            }}
-          />
-        </div>
-        <Button type="submit">Submit</Button>
+        
+        <Button type="submit" className="rounded-xl">Submit</Button>
       </form>
     </div>
   );

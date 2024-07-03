@@ -40,6 +40,7 @@
     "react": "^18",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18",
+    "react-icons": "^5.2.1",
     "react-markdown": "^9.0.1",
     "react-resizable-panels": "^2.0.19",
     "tailwind-merge": "^2.3.0",
