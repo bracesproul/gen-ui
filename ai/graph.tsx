@@ -6,7 +6,7 @@ import {
   MessagesPlaceholder,
 } from "@langchain/core/prompts";
 import { githubTool, invoiceTool, weatherTool, websiteDataTool } from "./tools";
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatOpenAI, AzureChatOpenAI } from "@langchain/openai";
 
 interface AgentExecutorState {
   input: string;
@@ -50,7 +50,7 @@ Your job is to determine whether or not you have a tool which can handle the use
 
   const llm = new ChatOpenAI({
     temperature: 0,
-    model: "gpt-4o",
+    // model: "gpt-4o",
     streaming: true,
   }).bindTools(tools);
   const chain = initialPrompt.pipe(llm);
