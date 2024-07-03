@@ -2,25 +2,27 @@
 
 import { Card } from "../ui/card";
 import { Skeleton } from "../ui/skeleton";
+import Image from "next/image";
 
 export interface DallEProps {
-  imageURL: string;
+  imageURL: string ;
 }
 
 export function DallELoading() {
   return (
-    <Card className="w-[325px] max-w-[325px] p-4 h-[350px] max-h-[350px] flex flex-col text-gray-50 bg-white">
-      <Skeleton className="h-[16px] w-full" />
-      <span>image loading</span>
-    </Card>
+    <Skeleton className="w-[350px] max-w-[350px] h-[350px] max-h-[350px] bg-slate-500" />
   );
 }
 
 export function DallE(props: DallEProps) {
+  
   return (
-    <Card className="w-[325px] max-w-[325px] p-4 h-[350px] max-h-[350px] flex flex-col text-grey-900 bg-white">
-      <a href={props.imageURL} target="_blank">
-      </a>
-    </Card>
+    <Image
+      src={props.imageURL}
+      width={350}
+      height={350}
+      alt="Picture of the author"
+      className="bg-slate-500"
+    />  
   );
 }
