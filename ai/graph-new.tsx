@@ -7,25 +7,16 @@ import {
 } from "@langchain/core/prompts";
 import { githubTool, invoiceTool, weatherTool, websiteDataTool, dalleTool } from "./tools";
 import { ChatOpenAI, AzureChatOpenAI } from "@langchain/openai";
+import axios from 'axios';
 
 interface AgentExecutorState {
   input: string;
   chat_history: BaseMessage[];
-  /**
-   * The plain text result of the LLM if
-   * no tool was used.
-   */
   result?: string;
-  /**
-   * The parsed tool result that was called.
-   */
   toolCall?: {
     name: string;
     parameters: Record<string, any>;
   };
-  /**
-   * The result of a tool.
-   */
   toolResult?: Record<string, any>;
 }
 
@@ -33,47 +24,32 @@ const invokeModel = async (
   state: AgentExecutorState,
   config?: RunnableConfig,
 ): Promise<Partial<AgentExecutorState>> => {
-  const initialPrompt = ChatPromptTemplate.fromMessages([
-    [
-      "system",
-      `You are a helpful assistant. You're provided a list of tools, and an input from the user.\n
-Your job is to determine whether or not you have a tool which can handle the users input, or respond with plain text.`,
-    ],
-    new MessagesPlaceholder({
-      variableName: "chat_history",
-      optional: true,
-    }),
-    ["human", "{input}"],
-  ]);
-
-  const tools = [githubTool, invoiceTool, weatherTool, websiteDataTool, dalleTool];
-
-  const llm = new ChatOpenAI({
-    temperature: 0,
-    model: "gpt-4o",
-    streaming: true,
-  }).bindTools(tools);
-  const chain = initialPrompt.pipe(llm);
-  const result = await chain.invoke(
-    {
+  try {
+    // Prepare the payload for the Flask backend
+    const payload = {
       input: state.input,
-      chat_history: state.chat_history,
-    },
-    config,
-  );
-
-  if (result.tool_calls && result.tool_calls.length > 0) {
-    return {
-      toolCall: {
-        name: result.tool_calls[0].name,
-        parameters: result.tool_calls[0].args,
-      },
+      chat_history: state.chat_history
     };
+
+    // Call the Flask endpoint
+    const response = await axios.post('http://localhost:5500/api/invoke-model', payload, config);
+
+    // Extract the content of the assistant's message
+    const assistantMessage = response.data.choices[0].message.content;
+
+    console.log('Assistant message:', assistantMessage);
+
+    // Update the state with the assistant's response
+    return {
+      result: assistantMessage,
+    };
+  } catch (error) {
+    console.error('Error invoking model:', error);
+    throw new Error('Failed to invoke model.');
   }
-  return {
-    result: result.content as string,
-  };
 };
+
+
 
 const invokeToolsOrReturn = (state: AgentExecutorState) => {
   if (state.toolCall) {
