@@ -103,7 +103,7 @@ export default function Chat() {
   }
 
   return (
-    <div className=" overflow-y-scroll w-full h-screen max-h-dvh flex flex-col gap-4 mx-autorounded-lg p-3 shadow-sm">
+    <div className="w-full h-screen max-h-dvh flex flex-col gap-4 mx-autorounded-lg p-3 shadow-sm">
       <header className="p-4">
         <h1 className="text-lg font-semibold">ChatHKT</h1>
       </header>
