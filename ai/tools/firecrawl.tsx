@@ -2,6 +2,7 @@ import { WebLoading, Web } from "@/components/prebuilt/web";
 import { createRunnableUI } from "@/utils/server";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { FireCrawlLoader } from "@langchain/community/document_loaders/web/firecrawl";
+import { WebBrowser } from "langchain/tools/webbrowser";
 import { z } from "zod";
 
 export const webSchema = z.object({

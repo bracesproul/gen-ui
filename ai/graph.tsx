@@ -5,8 +5,8 @@ import {
   ChatPromptTemplate,
   MessagesPlaceholder,
 } from "@langchain/core/prompts";
-import { githubTool, invoiceTool, weatherTool, websiteDataTool, dalleTool } from "./tools";
-import { ChatOpenAI, AzureChatOpenAI } from "@langchain/openai";
+import { githubTool, invoiceTool, weatherTool, dalleTool, webBrowserTool } from "./tools";
+import { ChatOpenAI, AzureChatOpenAI, OpenAI } from "@langchain/openai";
 
 interface AgentExecutorState {
   input: string;
@@ -46,7 +46,7 @@ Your job is to determine whether or not you have a tool which can handle the use
     ["human", "{input}"],
   ]);
 
-  const tools = [githubTool, invoiceTool, weatherTool, websiteDataTool, dalleTool];
+  const tools = [githubTool, invoiceTool, weatherTool, dalleTool, webBrowserTool];
 
   const llm = new ChatOpenAI({
     temperature: 0,
@@ -96,8 +96,8 @@ const invokeTools = async (
     [githubTool.name]: githubTool,
     [invoiceTool.name]: invoiceTool,
     [weatherTool.name]: weatherTool,
-    [websiteDataTool.name]: websiteDataTool,
     [dalleTool.name]: dalleTool,
+    [webBrowserTool.name]: webBrowserTool,
   };
 
   const selectedTool = toolMap[state.toolCall.name];
