@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, use } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { EndpointsContext } from "@/app/agent";
@@ -40,6 +40,7 @@ export default function Chat() {
   const [history, setHistory] = useState<[role: string, content: string][]>([]);
   const [input, setInput] = useState("");
   const [selectedFile, setSelectedFile] = useState<File>();
+  const [submitLock, setSubmitLock] = useState(false);
 
   async function onSubmit(input: string) {
     const newElements = [...elements];
@@ -48,7 +49,12 @@ export default function Chat() {
     if (selectedFile) {
       base64File = await convertFileToBase64(selectedFile);
     }
-
+    console.log("submit");
+    if(submitLock) {
+      return;
+    }
+    setSubmitLock(true)
+    console.log("submit lock");
     const element = await actions.agent({
       input,
       chat_history: history,
@@ -95,7 +101,11 @@ export default function Chat() {
           console.log("ELSE!", lastEvent);
         }
       }
-    })();
+    })().then(() => {
+      console.log("done");
+      setSubmitLock(false);
+      console.log("submit unlock");
+    });;
 
     setElements(newElements);
     setInput("");
@@ -142,7 +152,7 @@ export default function Chat() {
           className="rounded-xl"
         />
         
-        <Button type="submit" className="rounded-xl">Submit</Button>
+        <Button type="submit" className="rounded-xl" disabled={submitLock}>{submitLock ? "..." : "Submit"}</Button>
       </form>
     </div>
   );
