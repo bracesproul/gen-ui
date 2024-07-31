@@ -78,7 +78,8 @@ export function streamRunnableUI<RunInput, RunOutput>(
     resolve(lastEventValue?.data.output);
 
     Object.values(callbacks).forEach((cb) => cb.done());
-    // ui.done();
+    ui.append(<></>)
+    ui.done();
   })();
 
   return { ui: ui.value, lastEvent };
