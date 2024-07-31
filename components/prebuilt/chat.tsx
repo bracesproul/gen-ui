@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { EndpointsContext } from "@/app/agent";
@@ -40,6 +40,10 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [selectedFile, setSelectedFile] = useState<File>();
 
+  useEffect(() => {
+    console.log("Elements updated!")
+  }, [elements])
+
   async function onSubmit(input: string) {
     const newElements = [...elements];
     let base64File: string | undefined = undefined;
@@ -74,6 +78,8 @@ export default function Chat() {
     // after which we can append to our chat history state
     (async () => {
       let lastEvent = await element.lastEvent;
+      console.log("Last event consumed! 👇");
+      console.dir(lastEvent, { depth: null });
       if (typeof lastEvent === "object") {
         if (lastEvent["invokeModel"]["result"]) {
           setHistory((prev) => [
