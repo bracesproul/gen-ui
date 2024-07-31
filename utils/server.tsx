@@ -78,7 +78,7 @@ export function streamRunnableUI<RunInput, RunOutput>(
     resolve(lastEventValue?.data.output);
 
     Object.values(callbacks).forEach((cb) => cb.done());
-    ui.append(<></>)
+    ui.append(<div className="hidden"></div>)
     ui.done();
   })();
 
