@@ -7,6 +7,8 @@ import {
 } from "@langchain/core/prompts";
 import { githubTool, invoiceTool, weatherTool, websiteDataTool } from "./tools";
 import { ChatOpenAI } from "@langchain/openai";
+import { StructuredTool } from "@langchain/core/tools";
+import { z } from "zod";
 
 interface AgentExecutorState {
   input: string;
@@ -92,7 +94,9 @@ const invokeTools = async (
   if (!state.toolCall) {
     throw new Error("No tool call found.");
   }
-  const toolMap = {
+  const toolMap: {
+    [name: string]: StructuredTool<z.ZodObject<any>>;
+  } = {
     [githubTool.name]: githubTool,
     [invoiceTool.name]: invoiceTool,
     [weatherTool.name]: weatherTool,

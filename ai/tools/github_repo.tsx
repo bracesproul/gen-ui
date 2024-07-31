@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { Octokit } from "octokit";
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { tool } from "@langchain/core/tools";
 import { createRunnableUI } from "@/utils/server";
 import { Github, GithubLoading } from "@/components/prebuilt/github";
 
@@ -36,12 +36,8 @@ async function githubRepoTool(input: z.infer<typeof githubRepoToolSchema>) {
   }
 }
 
-export const githubTool = new DynamicStructuredTool({
-  name: "github_repo",
-  description:
-    "A tool to fetch details of a Github repository. Given owner and repo names, this tool will return the repo description, stars, and primary language.",
-  schema: githubRepoToolSchema,
-  func: async (input, config) => {
+export const githubTool = tool(
+  async (input, config) => {
     const stream = await createRunnableUI(config, <GithubLoading />);
     const result = await githubRepoTool(input);
     if (typeof result === "string") {
@@ -52,4 +48,10 @@ export const githubTool = new DynamicStructuredTool({
     stream.done(<Github {...result} />);
     return JSON.stringify(result, null);
   },
-});
+  {
+    name: "github_repo",
+    description:
+      "A tool to fetch details of a Github repository. Given owner and repo names, this tool will return the repo description, stars, and primary language.",
+    schema: githubRepoToolSchema,
+  },
+);

@@ -8,7 +8,11 @@ import {
   CallbackManagerForChainRun,
 } from "@langchain/core/callbacks/manager";
 import { createStreamableUI, createStreamableValue } from "ai/rsc";
-import { Runnable, RunnableLambda } from "@langchain/core/runnables";
+import {
+  Runnable,
+  RunnableConfig,
+  RunnableLambda,
+} from "@langchain/core/runnables";
 import { CompiledStateGraph } from "@langchain/langgraph";
 import { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { AIMessage } from "@/ai/message";
@@ -79,7 +83,7 @@ export function streamRunnableUI<RunInput, RunOutput>(
 
     // Closes the stream of all text UI elements
     Object.values(callbacks).forEach((cb) => cb.done());
-  
+
     // Close the main UI stream created in this function.
     ui.done();
   })();
@@ -96,15 +100,11 @@ export function streamRunnableUI<RunInput, RunOutput>(
  * @returns Vercel AI RSC compatible streamable UI
  */
 export const createRunnableUI = async (
-  callbackManager:
-    | CallbackManagerForToolRun
-    | CallbackManagerForRetrieverRun
-    | CallbackManagerForChainRun
-    | undefined,
+  config: RunnableConfig | undefined,
   initialValue?: React.ReactNode,
 ): Promise<ReturnType<typeof createStreamableUI>> => {
-  if (!callbackManager) {
-    throw new Error("Callback manager is not defined");
+  if (!config) {
+    throw new Error("Config is not defined");
   }
 
   const lambda = RunnableLambda.from((init?: React.ReactNode) => {
@@ -112,7 +112,7 @@ export const createRunnableUI = async (
     return ui;
   }).withConfig({ runName: STREAM_UI_RUN_NAME });
 
-  return lambda.invoke(initialValue, { callbacks: callbackManager.getChild() });
+  return lambda.invoke(initialValue, config);
 };
 
 /**

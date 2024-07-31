@@ -41,8 +41,8 @@ export default function Chat() {
   const [selectedFile, setSelectedFile] = useState<File>();
 
   useEffect(() => {
-    console.log("Elements updated!")
-  }, [elements])
+    console.log("Elements updated!");
+  }, [elements]);
 
   async function onSubmit(input: string) {
     const newElements = [...elements];
