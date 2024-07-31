@@ -1,6 +1,6 @@
 import { WebLoading, Web } from "@/components/prebuilt/web";
 import { createRunnableUI } from "@/utils/server";
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { tool } from "@langchain/core/tools";
 import { FireCrawlLoader } from "@langchain/community/document_loaders/web/firecrawl";
 import { z } from "zod";
 
@@ -31,14 +31,13 @@ export async function webData(input: z.infer<typeof webSchema>) {
   };
 }
 
-export const websiteDataTool = new DynamicStructuredTool({
-  name: "get_web_data",
-  description: "A tool to fetch the current website data, given a url.",
-  schema: webSchema,
-  func: async (input, config) => {
-    const stream = await createRunnableUI(config, <WebLoading />);
+export const websiteDataTool = tool(async (input, config) => {
+  const stream = await createRunnableUI(config, <WebLoading />);
     const data = await webData(input);
     stream.done(<Web {...data} />);
     return JSON.stringify(data, null);
-  },
+}, {
+  name: "get_web_data",
+  description: "A tool to fetch the current website data, given a url.",
+  schema: webSchema,
 });

@@ -2,18 +2,16 @@ import "server-only";
 
 import { ReactNode, isValidElement } from "react";
 import { AIProvider } from "./client";
-import {
-  CallbackManagerForToolRun,
-  CallbackManagerForRetrieverRun,
-  CallbackManagerForChainRun,
-} from "@langchain/core/callbacks/manager";
 import { createStreamableUI, createStreamableValue } from "ai/rsc";
-import { Runnable, RunnableLambda } from "@langchain/core/runnables";
+import { Runnable, RunnableConfig, RunnableLambda } from "@langchain/core/runnables";
 import { CompiledStateGraph } from "@langchain/langgraph";
 import { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { AIMessage } from "@/ai/message";
 
+export const dynamic = 'force-dynamic';
+
 const STREAM_UI_RUN_NAME = "stream_runnable_ui";
+export const CUSTOM_UI_YIELD_NAME = "__yield_ui__";
 
 /**
  * Executes `streamEvents` method on a runnable
@@ -42,9 +40,17 @@ export function streamRunnableUI<RunInput, RunOutput>(
     for await (const streamEvent of (
       runnable as Runnable<RunInput, RunOutput>
     ).streamEvents(inputs, {
-      version: "v1",
+      version: "v2",
     })) {
-      if (
+      if (streamEvent.name === CUSTOM_UI_YIELD_NAME) {
+        if (isValidElement(streamEvent.data.output.value)) {
+          if (streamEvent.data.output.type === "append") {
+            ui.append(streamEvent.data.output.value);
+          } else if (streamEvent.data.output.type === "update") {
+            ui.update(streamEvent.data.output.value);
+          }
+        }
+      } else if (
         streamEvent.name === STREAM_UI_RUN_NAME &&
         streamEvent.event === "on_chain_end"
       ) {
@@ -88,19 +94,15 @@ export function streamRunnableUI<RunInput, RunOutput>(
  * Yields an UI element within a runnable,
  * which can be streamed to the client via `streamRunnableUI`
  *
- * @param callbackManager callback
+ * @param config RunnableConfig
  * @param initialValue Initial React node to be sent to the client
  * @returns Vercel AI RSC compatible streamable UI
  */
 export const createRunnableUI = async (
-  callbackManager:
-    | CallbackManagerForToolRun
-    | CallbackManagerForRetrieverRun
-    | CallbackManagerForChainRun
-    | undefined,
+  config: RunnableConfig | undefined,
   initialValue?: React.ReactNode,
 ): Promise<ReturnType<typeof createStreamableUI>> => {
-  if (!callbackManager) {
+  if (!config) {
     throw new Error("Callback manager is not defined");
   }
 
@@ -109,7 +111,7 @@ export const createRunnableUI = async (
     return ui;
   }).withConfig({ runName: STREAM_UI_RUN_NAME });
 
-  return lambda.invoke(initialValue, { callbacks: callbackManager.getChild() });
+  return lambda.invoke(initialValue, config);
 };
 
 /**
