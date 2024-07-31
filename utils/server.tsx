@@ -2,11 +2,6 @@ import "server-only";
 
 import { ReactNode, isValidElement } from "react";
 import { AIProvider } from "./client";
-import {
-  CallbackManagerForToolRun,
-  CallbackManagerForRetrieverRun,
-  CallbackManagerForChainRun,
-} from "@langchain/core/callbacks/manager";
 import { createStreamableUI, createStreamableValue } from "ai/rsc";
 import {
   Runnable,
@@ -16,6 +11,8 @@ import {
 import { CompiledStateGraph } from "@langchain/langgraph";
 import { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { AIMessage } from "@/ai/message";
+
+export const dynamic = 'force-dynamic';
 
 const STREAM_UI_RUN_NAME = "stream_runnable_ui";
 

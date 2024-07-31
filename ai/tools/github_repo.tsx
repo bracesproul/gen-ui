@@ -4,6 +4,8 @@ import { tool } from "@langchain/core/tools";
 import { createRunnableUI } from "@/utils/server";
 import { Github, GithubLoading } from "@/components/prebuilt/github";
 
+export const dynamic = 'force-dynamic';
+
 const githubRepoToolSchema = z.object({
   owner: z.string().describe("The name of the repository owner."),
   repo: z.string().describe("The name of the repository."),

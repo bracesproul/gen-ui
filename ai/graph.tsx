@@ -10,6 +10,8 @@ import { ChatOpenAI } from "@langchain/openai";
 import { StructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
 
+export const dynamic = 'force-dynamic';
+
 interface AgentExecutorState {
   input: string;
   chat_history: BaseMessage[];
