@@ -51,13 +51,16 @@ export const InvoiceSchema = z.object({
   ),
 });
 
-export const invoiceTool = tool(async (input, config) => {
-  const stream = await createRunnableUI(config, <InvoiceLoading />);
+export const invoiceTool = tool(
+  async (input, config) => {
+    const stream = await createRunnableUI(config, <InvoiceLoading />);
     stream.done(<Invoice {...input} />);
     return JSON.stringify(input, null);
-}, {
-  name: "get_order_invoice",
-  description:
-    "A tool to fetch the invoice from an order. This should only be called if a user uploads an image/receipt of an order.",
-  schema: InvoiceSchema,
-})
+  },
+  {
+    name: "get_order_invoice",
+    description:
+      "A tool to fetch the invoice from an order. This should only be called if a user uploads an image/receipt of an order.",
+    schema: InvoiceSchema,
+  },
+);

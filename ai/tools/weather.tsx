@@ -61,14 +61,17 @@ export async function weatherData(input: WeatherToolSchema) {
   };
 }
 
-export const weatherTool = tool(async (input, config) => {
-  const stream = await createRunnableUI(config, <CurrentWeatherLoading />);
+export const weatherTool = tool(
+  async (input, config) => {
+    const stream = await createRunnableUI(config, <CurrentWeatherLoading />);
     const data = await weatherData(input);
     stream.done(<CurrentWeather {...data} />);
     return JSON.stringify(data, null);
-}, {
-  name: "get_weather",
-  description:
-    "A tool to fetch the current weather, given a city and state. If the city/state is not provided, ask the user for both the city and state.",
-  schema: weatherSchema,
-});
+  },
+  {
+    name: "get_weather",
+    description:
+      "A tool to fetch the current weather, given a city and state. If the city/state is not provided, ask the user for both the city and state.",
+    schema: weatherSchema,
+  },
+);

@@ -3,12 +3,16 @@ import "server-only";
 import { ReactNode, isValidElement } from "react";
 import { AIProvider } from "./client";
 import { createStreamableUI, createStreamableValue } from "ai/rsc";
-import { Runnable, RunnableConfig, RunnableLambda } from "@langchain/core/runnables";
+import {
+  Runnable,
+  RunnableConfig,
+  RunnableLambda,
+} from "@langchain/core/runnables";
 import { CompiledStateGraph } from "@langchain/langgraph";
 import { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { AIMessage } from "@/ai/message";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 const STREAM_UI_RUN_NAME = "stream_runnable_ui";
 export const CUSTOM_UI_YIELD_NAME = "__yield_ui__";

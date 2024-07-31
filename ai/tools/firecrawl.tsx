@@ -31,13 +31,16 @@ export async function webData(input: z.infer<typeof webSchema>) {
   };
 }
 
-export const websiteDataTool = tool(async (input, config) => {
-  const stream = await createRunnableUI(config, <WebLoading />);
+export const websiteDataTool = tool(
+  async (input, config) => {
+    const stream = await createRunnableUI(config, <WebLoading />);
     const data = await webData(input);
     stream.done(<Web {...data} />);
     return JSON.stringify(data, null);
-}, {
-  name: "get_web_data",
-  description: "A tool to fetch the current website data, given a url.",
-  schema: webSchema,
-});
+  },
+  {
+    name: "get_web_data",
+    description: "A tool to fetch the current website data, given a url.",
+    schema: webSchema,
+  },
+);
