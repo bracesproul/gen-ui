@@ -42,10 +42,12 @@ export const githubTool = tool(
     const result = await githubRepoTool(input);
     if (typeof result === "string") {
       // Failed to parse, return error message
-      stream.done(<p>{result}</p>);
+      stream.update(<p>{result}</p>);
+      stream.done();
       return result;
     }
-    stream.done(<Github {...result} />);
+    stream.update(<Github {...result} />);
+    stream.done();
     return JSON.stringify(result, null);
   },
   {
