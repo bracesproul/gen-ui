@@ -1,3 +1,5 @@
+import "server-only";
+
 import { BaseMessage } from "@langchain/core/messages";
 import { RunnableConfig } from "@langchain/core/runnables";
 import { StateGraph, START, END } from "@langchain/langgraph";
@@ -37,7 +39,6 @@ const invokeModel = async (
   state: AgentExecutorState,
   config?: RunnableConfig,
 ): Promise<Partial<AgentExecutorState>> => {
-  'use server';
   const initialPrompt = ChatPromptTemplate.fromMessages([
     [
       "system",
@@ -94,7 +95,6 @@ const invokeTools = async (
   state: AgentExecutorState,
   config?: RunnableConfig,
 ): Promise<Partial<AgentExecutorState>> => {
-  'use server';
   if (!state.toolCall) {
     throw new Error("No tool call found.");
   }

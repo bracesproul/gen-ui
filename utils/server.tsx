@@ -33,7 +33,6 @@ export function streamRunnableUI<RunInput, RunOutput>(
   const [lastEvent, resolve] = withResolvers<string>();
 
   (async () => {
-    'use server';
     let lastEventValue: StreamEvent | null = null;
 
     const callbacks: Record<
