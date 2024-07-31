@@ -3,18 +3,13 @@ import "server-only";
 import { ReactNode, isValidElement } from "react";
 import { AIProvider } from "./client";
 import { createStreamableUI, createStreamableValue } from "ai/rsc";
-import {
-  Runnable,
-  RunnableConfig,
-  RunnableLambda,
-} from "@langchain/core/runnables";
+import { Runnable } from "@langchain/core/runnables";
 import { CompiledStateGraph } from "@langchain/langgraph";
 import { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { AIMessage } from "@/ai/message";
 
 export const dynamic = "force-dynamic";
 
-const STREAM_UI_RUN_NAME = "stream_runnable_ui";
 export const CUSTOM_UI_YIELD_NAME = "__yield_ui__";
 
 /**
@@ -46,20 +41,14 @@ export function streamRunnableUI<RunInput, RunOutput>(
     ).streamEvents(inputs, {
       version: "v2",
     })) {
-      if (streamEvent.name === CUSTOM_UI_YIELD_NAME) {
-        if (isValidElement(streamEvent.data.output.value)) {
-          if (streamEvent.data.output.type === "append") {
-            ui.append(streamEvent.data.output.value);
-          } else if (streamEvent.data.output.type === "update") {
-            ui.update(streamEvent.data.output.value);
-          }
-        }
-      } else if (
-        streamEvent.name === STREAM_UI_RUN_NAME &&
-        streamEvent.event === "on_chain_end"
+      if (
+        streamEvent.name === CUSTOM_UI_YIELD_NAME &&
+        isValidElement(streamEvent.data.output.value)
       ) {
-        if (isValidElement(streamEvent.data.output.value)) {
+        if (streamEvent.data.output.type === "append") {
           ui.append(streamEvent.data.output.value);
+        } else if (streamEvent.data.output.type === "update") {
+          ui.update(streamEvent.data.output.value);
         }
       }
 
@@ -83,40 +72,18 @@ export function streamRunnableUI<RunInput, RunOutput>(
       lastEventValue = streamEvent;
     }
 
-    // resolve the promise, which will be sent
-    // to the client thanks to RSC
+    // resolve the promise, allowing the client to continue
     resolve(lastEventValue?.data.output);
 
+    // Close the UI stream for all text streams.
     Object.values(callbacks).forEach((cb) => cb.done());
+
+    // Close the main UI stream for component streams yielded by tools.
     ui.done();
   })();
 
   return { ui: ui.value, lastEvent };
 }
-
-/**
- * Yields an UI element within a runnable,
- * which can be streamed to the client via `streamRunnableUI`
- *
- * @param config RunnableConfig
- * @param initialValue Initial React node to be sent to the client
- * @returns Vercel AI RSC compatible streamable UI
- */
-export const createRunnableUI = async (
-  config: RunnableConfig | undefined,
-  initialValue?: React.ReactNode,
-): Promise<ReturnType<typeof createStreamableUI>> => {
-  if (!config) {
-    throw new Error("Callback manager is not defined");
-  }
-
-  const lambda = RunnableLambda.from((init?: React.ReactNode) => {
-    const ui = createStreamableUI(init);
-    return ui;
-  }).withConfig({ runName: STREAM_UI_RUN_NAME });
-
-  return lambda.invoke(initialValue, config);
-};
 
 /**
  * Expose these endpoints outside for the client

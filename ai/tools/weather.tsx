@@ -2,8 +2,9 @@ import {
   CurrentWeatherLoading,
   CurrentWeather,
 } from "@/components/prebuilt/weather";
-import { createRunnableUI } from "@/utils/server";
-import { DynamicStructuredTool, tool } from "@langchain/core/tools";
+import { CUSTOM_UI_YIELD_NAME } from "@/utils/server";
+import { dispatchCustomEvent } from "@langchain/core/callbacks/dispatch/web";
+import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 
 export const weatherSchema = z.object({
@@ -63,9 +64,27 @@ export async function weatherData(input: WeatherToolSchema) {
 
 export const weatherTool = tool(
   async (input, config) => {
-    const stream = await createRunnableUI(config, <CurrentWeatherLoading />);
+    await dispatchCustomEvent(
+      CUSTOM_UI_YIELD_NAME,
+      {
+        output: {
+          value: <CurrentWeatherLoading />,
+          type: "append",
+        },
+      },
+      config,
+    );
     const data = await weatherData(input);
-    stream.done(<CurrentWeather {...data} />);
+    await dispatchCustomEvent(
+      CUSTOM_UI_YIELD_NAME,
+      {
+        output: {
+          value: <CurrentWeather {...data} />,
+          type: "update",
+        },
+      },
+      config,
+    );
     return JSON.stringify(data, null);
   },
   {

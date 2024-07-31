@@ -39,7 +39,6 @@ async function githubRepoTool(input: z.infer<typeof githubRepoToolSchema>) {
 
 export const githubTool = tool(
   async (input, config) => {
-    // const stream = await createRunnableUI(config, <GithubLoading />);
     await dispatchCustomEvent(
       CUSTOM_UI_YIELD_NAME,
       {
