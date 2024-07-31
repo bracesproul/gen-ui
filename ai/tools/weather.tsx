@@ -2,8 +2,9 @@ import {
   CurrentWeatherLoading,
   CurrentWeather,
 } from "@/components/prebuilt/weather";
-import { createRunnableUI } from "@/utils/server";
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { CUSTOM_UI_YIELD_NAME } from "@/utils/server";
+import { dispatchCustomEvent } from "@langchain/core/callbacks/dispatch/web";
+import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 
 export const weatherSchema = z.object({
@@ -18,7 +19,9 @@ export const weatherSchema = z.object({
     .describe("The two letter country abbreviation to get weather for"),
 });
 
-export async function weatherData(input: z.infer<typeof weatherSchema>) {
+export type WeatherToolSchema = z.infer<typeof weatherSchema>;
+
+export async function weatherData(input: WeatherToolSchema) {
   const geoCodeApiKey = process.env.GEOCODE_API_KEY;
   if (!geoCodeApiKey) {
     throw new Error("Missing GEOCODE_API_KEY secret.");
@@ -59,15 +62,35 @@ export async function weatherData(input: z.infer<typeof weatherSchema>) {
   };
 }
 
-export const weatherTool = new DynamicStructuredTool({
-  name: "get_weather",
-  description:
-    "A tool to fetch the current weather, given a city and state. If the city/state is not provided, ask the user for both the city and state.",
-  schema: weatherSchema,
-  func: async (input, config) => {
-    const stream = await createRunnableUI(config, <CurrentWeatherLoading />);
+export const weatherTool = tool(
+  async (input, config) => {
+    await dispatchCustomEvent(
+      CUSTOM_UI_YIELD_NAME,
+      {
+        output: {
+          value: <CurrentWeatherLoading />,
+          type: "append",
+        },
+      },
+      config,
+    );
     const data = await weatherData(input);
-    stream.done(<CurrentWeather {...data} />);
+    await dispatchCustomEvent(
+      CUSTOM_UI_YIELD_NAME,
+      {
+        output: {
+          value: <CurrentWeather {...data} />,
+          type: "update",
+        },
+      },
+      config,
+    );
     return JSON.stringify(data, null);
   },
-});
+  {
+    name: "get_weather",
+    description:
+      "A tool to fetch the current weather, given a city and state. If the city/state is not provided, ask the user for both the city and state.",
+    schema: weatherSchema,
+  },
+);

@@ -104,7 +104,7 @@ const invokeTools = async (
     throw new Error("No tool found in tool map.");
   }
   const toolResult = await selectedTool.invoke(
-    state.toolCall.parameters,
+    state.toolCall.parameters as any,
     config,
   );
   return {

@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { v4 as uuidv4 } from "uuid";
 import { InvoiceLoading, Invoice } from "@/components/prebuilt/invoice";
-import { createRunnableUI } from "@/utils/server";
-import { DynamicStructuredTool } from "@langchain/core/tools";
+import { CUSTOM_UI_YIELD_NAME } from "@/utils/server";
+import { tool } from "@langchain/core/tools";
+import { dispatchCustomEvent } from "@langchain/core/callbacks/dispatch/web";
 
 const LineItemSchema = z.object({
   id: z
@@ -51,14 +52,34 @@ export const InvoiceSchema = z.object({
   ),
 });
 
-export const invoiceTool = new DynamicStructuredTool({
-  name: "get_order_invoice",
-  description:
-    "A tool to fetch the invoice from an order. This should only be called if a user uploads an image/receipt of an order.",
-  schema: InvoiceSchema,
-  func: async (input, config) => {
-    const stream = await createRunnableUI(config, <InvoiceLoading />);
-    stream.done(<Invoice {...input} />);
+export const invoiceTool = tool(
+  async (input, config) => {
+    await dispatchCustomEvent(
+      CUSTOM_UI_YIELD_NAME,
+      {
+        output: {
+          value: <InvoiceLoading />,
+          type: "append",
+        },
+      },
+      config,
+    );
+    await dispatchCustomEvent(
+      CUSTOM_UI_YIELD_NAME,
+      {
+        output: {
+          value: <Invoice {...input} />,
+          type: "update",
+        },
+      },
+      config,
+    );
     return JSON.stringify(input, null);
   },
-});
+  {
+    name: "get_order_invoice",
+    description:
+      "A tool to fetch the invoice from an order. This should only be called if a user uploads an image/receipt of an order.",
+    schema: InvoiceSchema,
+  },
+);
