@@ -29,6 +29,7 @@ export function streamRunnableUI<RunInput, RunOutput>(
     | CompiledStateGraph<RunInput, Partial<RunInput>>,
   inputs: RunInput,
 ) {
+  'use server';
   const ui = createStreamableUI();
   const [lastEvent, resolve] = withResolvers<string>();
 

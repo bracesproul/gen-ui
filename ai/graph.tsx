@@ -119,6 +119,8 @@ const invokeTools = async (
 };
 
 export function agentExecutor() {
+  'use server';
+  
   const workflow = new StateGraph<AgentExecutorState>({
     channels: {
       input: null,

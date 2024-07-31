@@ -40,6 +40,7 @@ async function githubRepoTool(input: z.infer<typeof githubRepoToolSchema>) {
 
 export const githubTool = tool(
   async (input, config) => {
+    'use server';
     const stream = await createRunnableUI(config, <GithubLoading />);
     const result = await githubRepoTool(input);
     if (typeof result === "string") {
