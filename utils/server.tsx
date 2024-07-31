@@ -52,8 +52,7 @@ export function streamRunnableUI<RunInput, RunOutput>(
         }
       }
 
-      const [kind, type] = streamEvent.event.split("_").slice(1);
-      if (type === "stream" && kind !== "chain") {
+      if (streamEvent.event === "on_chat_model_stream") {
         const chunk = streamEvent.data.chunk;
         if ("text" in chunk && typeof chunk.text === "string") {
           if (!callbacks[streamEvent.run_id]) {
