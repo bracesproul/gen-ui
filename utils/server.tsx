@@ -74,11 +74,13 @@ export function streamRunnableUI<RunInput, RunOutput>(
     }
 
     // resolve the promise, which will be sent
-    // to the client thanks to RSC
+    // to the client with RSC
     resolve(lastEventValue?.data.output);
 
+    // Closes the stream of all text UI elements
     Object.values(callbacks).forEach((cb) => cb.done());
-    ui.append(<div className="hidden">yessir!</div>)
+  
+    // Close the main UI stream created in this function.
     ui.done();
   })();
 
