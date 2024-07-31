@@ -70,8 +70,9 @@ export const weatherTool = new DynamicStructuredTool({
     console.log("SENT INITIAL WEATHER COMPONENT!!!!")
     const data = await weatherData(input);
     console.log("GOT WEATHER DATA!!!!")
-    stream.done(<CurrentWeather {...data} />);
-    console.log("SENT WEATHER COMPONENT!!!!")
+    stream.update(<CurrentWeather {...data} />);
+    console.log("SENT WEATHER COMPONENT!!!!");
+    stream.done();
     return JSON.stringify(data, null);
   },
 });
